@@ -62,6 +62,8 @@ public class ParsePatchWorker extends UntypedActor {
 			int overRap = 0;
 			
 			Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches = new HashMap<>();
+			// dale
+			String patchCommitId = null;
 			
 			for (MessageFile msgFile : msgFiles) {
 				File revFile = msgFile.getRevFile();
@@ -88,7 +90,7 @@ public class ParsePatchWorker extends UntypedActor {
 					}
 					
 					if (patches.size() > 0) {
-						String patchCommitId = revFile.getName().substring(0, 6);
+						patchCommitId = revFile.getName().substring(0, 6);
 						if (!patchCommitIds.contains(patchCommitId)) {
 							patchCommitIds.add(patchCommitId);
 						}
@@ -113,16 +115,24 @@ public class ParsePatchWorker extends UntypedActor {
 				}
 			}
 			numOfPatches = calculatePatches(allPatches);
-			analyzePatches2(allPatches);
+//			analyzePatches(allPatches);
+			
+			List<String> allPatchStrList = analyzePatches2(allPatches, patchCommitId);
+			// TODO: add project name
+//			FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", allPatches.toString(), false);
+//			for (String str : allPatchStrList){
+//				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", str, true);
+//			}
 			// by dale
 //			System.out.println(allPatches);
 //			if (!allPatches.isEmpty()){
 //				System.out.println(allPatches);
 //			}
 			
-			FileHelper.outputToFile(this.outputPath + "Patches/patchsFile" + workerId + ".txt", patchesBuilder, false);
-			patchesBuilder.setLength(0);
-			
+			// dale comment
+//			FileHelper.outputToFile(this.outputPath + "Patches/patchsFile" + workerId + ".txt", patchesBuilder, false);
+//			patchesBuilder.setLength(0);
+//			
 			WorkerReturnMessage workerMsg = new WorkerReturnMessage(numOfPatches, this.stmtMaps, this.elementsMaps);
 			workerMsg.diffs = numOfDiff;
 			workerMsg.hunks = numOfHunks;
@@ -135,7 +145,7 @@ public class ParsePatchWorker extends UntypedActor {
 			workerMsg.patchCommitIds = patchCommitIds;
 			workerMsg.pureDelRootNodes = this.pureDelRootNodes;
 			
-			// dale 
+//			// dale 
 			if(this.expDepthList.isEmpty()){
 				System.out.println("this.expDepthList.isEmpty() --- ");
 				System.out.println(allPatches);
@@ -167,12 +177,20 @@ public class ParsePatchWorker extends UntypedActor {
 	/**
 	 * This is to output the operations
 	 * @param allPatches
+	 * @param patchCommitId 
 	 */
-	private void analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches) {
+	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId) {
 		// each hunk
+		List<String> strOpListAll = new ArrayList<>();
+		FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
+		
 		for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:allPatches.entrySet()){
 			DiffEntryHunk hunk = entry.getKey();
 			List<HierarchicalActionSet> hASList = entry.getValue();
+			
+			System.out.println("hunk:\n" + hunk.toString() + "hASList: \n" + hASList.toString());
+			FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "hunk:\n" + hunk.toString() + "\n\n\nhASList: \n" + hASList.toString() + "\n\n\n", true);
+			
 			for (HierarchicalActionSet hAS : hASList){
 				// operations based on string
 				String[] actLines = hAS.toString().split("\n");
@@ -226,18 +244,28 @@ public class ParsePatchWorker extends UntypedActor {
 						while(opList.get(tmpCnt2-2).getLevel() == op.getLevel()){
 							tmpCnt2 --;
 						}
-						op.setParentOpName("OP" + (tmpCnt2 - 1));
+						// consider two conditions
+						if(opList.get(tmpCnt2-2).getLevel() < op.getLevel()){
+							op.setParentOpName("OP" + (tmpCnt2 - 1));
+						}else{
+							op.setParentOpName("null");
+						}
 					}
 					// set child
-					if (op.getLevel() == largestLevel){
+					if (op.getLevel() == largestLevel || tmpCnt == opList.size()){  // debug
 						op.setChildOpName("null");
 					}else{
 						// larger level
 						int tmpCnt2 = tmpCnt;
-						while(opList.get(tmpCnt2).getLevel() == op.getLevel()){
+						while(tmpCnt2 < opList.size() && opList.get(tmpCnt2).getLevel() == op.getLevel()){
 							tmpCnt2 ++;
 						}
-						op.setChildOpName("OP" + (tmpCnt2 + 1));
+						// consider two conditions
+						if(tmpCnt2 < opList.size() && opList.get(tmpCnt2).getLevel() > op.getLevel()){
+							op.setChildOpName("OP" + (tmpCnt2 + 1));
+						}else{
+							op.setChildOpName("null");
+						}
 					}
 					System.out.println(op.getOpName() + " :  " + op.toString());
 					strOpList += op.toString();
@@ -245,9 +273,16 @@ public class ParsePatchWorker extends UntypedActor {
 				}
 				
 				System.out.println("strOpList: \n" + strOpList);
+				strOpListAll.add(strOpList);
+				
+				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "CII:\n" + strOpList + "\n\n\n", true);
 			}
-			System.out.println();
+//			System.out.println();
+//			for (String str : strOpListAll){
+//				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", str, true);
+//			}
 		}
+		return strOpListAll;
 		
 	}
 

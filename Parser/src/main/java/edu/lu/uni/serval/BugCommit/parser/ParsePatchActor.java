@@ -112,7 +112,10 @@ public class ParsePatchActor extends UntypedActor {
 			
 //			logger.info(counter + " workers finished their work...");
 			if (counter >= numberOfWorkers) {
-				exportData();
+				// dale comment
+				// here is a NPE. I comment it for future solution.
+				// TODO
+				//exportData();
 				if (projectName != null) {
 					readSelectedCommits();
 				}
