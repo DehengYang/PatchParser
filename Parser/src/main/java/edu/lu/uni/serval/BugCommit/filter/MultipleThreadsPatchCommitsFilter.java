@@ -29,7 +29,14 @@ public class MultipleThreadsPatchCommitsFilter {
 				final List<MessageFile> msgFiles = readMessageFiles(projectName, outputPath);
 				ActorSystem system = null;
 				ActorRef parsingActor = null;
-				int numberOfWorkers = Configuration.numOfWorkers.get(projectName);
+				// dale
+				int numberOfWorkers;
+				if( ! Configuration.numOfWorkers.keySet().contains(projectName)){
+					numberOfWorkers = 1;
+				}else{
+					numberOfWorkers = Configuration.numOfWorkers.get(projectName);
+				}
+				
 				final WorkMessage msg = new WorkMessage(0, msgFiles);
 				try {
 //					log.info("Parsing begins...");
@@ -52,7 +59,8 @@ public class MultipleThreadsPatchCommitsFilter {
 		List<String> commitIds = new ArrayList<>();
 		
 		msgFiles.addAll(getMessageFiles(keywordPatchsFile, "Keywords", commitIds));
-		msgFiles.addAll(getMessageFiles(linkedPatchsFile, "Linked", commitIds));
+		// dale comment
+//		msgFiles.addAll(getMessageFiles(linkedPatchsFile, "Linked", commitIds));
 
 //		System.out.println("Identified patch-related commits: " + commitIds.size());
 		return msgFiles;

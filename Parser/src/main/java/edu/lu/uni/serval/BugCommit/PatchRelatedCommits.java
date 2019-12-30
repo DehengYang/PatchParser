@@ -23,10 +23,11 @@ public class PatchRelatedCommits {
 		FileHelper.deleteDirectory(outputPath);
 		Map<String, String> map = new HashMap<>();
 		map.put("commons-io", "IO-");
-		map.put("commons-lang", "LANG-");
-		map.put("mahout", "MAHOUT-");
-		map.put("commons-math", "MATH-");
-		map.put("derby", "DERBY-");
+		// dale comment
+//		map.put("commons-lang", "LANG-");
+//		map.put("mahout", "MAHOUT-");
+//		map.put("commons-math", "MATH-");
+//		map.put("derby", "DERBY-");
 		for (File project : projects) {
 			if (!project.isDirectory()) continue;
 			String repoName = project.getName();

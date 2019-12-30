@@ -52,7 +52,7 @@ public class ParsePatchWorker extends UntypedActor {
 				final Future<?> future = executor.submit(new RunnableParser(prevFile, revFile, diffentryFile, parser));
 				try {
 					// wait for task to complete
-					future.get(600L, TimeUnit.SECONDS);
+					future.get(3600L, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
 					future.cancel(true);
 					System.err.println("#Timeout: " + revFile.getName());

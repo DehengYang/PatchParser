@@ -18,24 +18,24 @@ public class Main {
 		System.out.println("======================================================================================");
 		new Distribution().countLOC(Configuration.SUBJECTS_PATH);
 		
-		
-		System.out.println("\n\n\n======================================================================================");
-		System.out.println("Download fixed bug reports from JIRA.");
-		System.out.println("======================================================================================");
-		if (! new File(Configuration.BUG_REPORTS_PATH).exists()) {
-			DownloadBugReports dlbr = new DownloadBugReports();
-			dlbr.collectBugReports("IO-", Configuration.BUG_REPORT_URL, 1, 573);
-			dlbr.collectBugReports("LANG-", Configuration.BUG_REPORT_URL, 1, 1386);
-			dlbr.collectBugReports("MATH-", Configuration.BUG_REPORT_URL, 1, 1453);
-			dlbr.collectBugReports("MAHOUT-", Configuration.BUG_REPORT_URL, 1, 2030);
-			dlbr.collectBugReports("DERBY-", Configuration.BUG_REPORT_URL, 1, 6985);
-			dlbr.collectBugReports("LUCENE-", Configuration.BUG_REPORT_URL, 1, 8202);
-			dlbr.collectBugReports("SOLR-", Configuration.BUG_REPORT_URL, 1, 12036);
-			List<File> bugReportFiles = FileHelper.getAllFiles(Configuration.BUG_REPORTS_PATH, ".txt");
-			for (File bugReportFile : bugReportFiles) {
-				dlbr.parseBugReport(bugReportFile);
-			}
-		}
+		// dale comment
+//		System.out.println("\n\n\n======================================================================================");
+//		System.out.println("Download fixed bug reports from JIRA.");
+//		System.out.println("======================================================================================");
+//		if (! new File(Configuration.BUG_REPORTS_PATH).exists()) {
+//			DownloadBugReports dlbr = new DownloadBugReports();
+//			dlbr.collectBugReports("IO-", Configuration.BUG_REPORT_URL, 1, 573);
+//			dlbr.collectBugReports("LANG-", Configuration.BUG_REPORT_URL, 1, 1386);
+//			dlbr.collectBugReports("MATH-", Configuration.BUG_REPORT_URL, 1, 1453);
+//			dlbr.collectBugReports("MAHOUT-", Configuration.BUG_REPORT_URL, 1, 2030);
+//			dlbr.collectBugReports("DERBY-", Configuration.BUG_REPORT_URL, 1, 6985);
+//			dlbr.collectBugReports("LUCENE-", Configuration.BUG_REPORT_URL, 1, 8202);
+//			dlbr.collectBugReports("SOLR-", Configuration.BUG_REPORT_URL, 1, 12036);
+//			List<File> bugReportFiles = FileHelper.getAllFiles(Configuration.BUG_REPORTS_PATH, ".txt");
+//			for (File bugReportFile : bugReportFiles) {
+//				dlbr.parseBugReport(bugReportFile);
+//			}
+//		}
 		
 		
 		System.out.println("\n\n\n======================================================================================");

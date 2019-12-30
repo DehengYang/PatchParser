@@ -51,6 +51,8 @@ public class ParsePatchWorker extends UntypedActor {
 		if (msg instanceof WorkMessage) {
 			WorkMessage workMsg = (WorkMessage) msg;
 			int workerId = workMsg.getId();
+			// dale
+			System.out.println("workerId: " + workerId);
 			List<MessageFile> msgFiles = workMsg.getMsgFiles();
 			List<String> patchCommitIds = new ArrayList<>();
 			int numOfPatches = 0;
@@ -75,6 +77,16 @@ public class ParsePatchWorker extends UntypedActor {
 					// wait for task to complete
 					future.get(Configuration.TIMEOUT_THRESHOLD, TimeUnit.SECONDS);
 					Map<DiffEntryHunk, List<HierarchicalActionSet>> patches = parser.getPatches();
+					
+					// dale print
+					int cnt = 1;
+					for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:patches.entrySet()){
+//						System.out.println("\nhunk:" + hunk + "\n");
+						DiffEntryHunk hunk = entry.getKey();
+						List<HierarchicalActionSet> hAS = entry.getValue();
+//						System.out.println(cnt++);
+					}
+					
 					if (patches.size() > 0) {
 						String patchCommitId = revFile.getName().substring(0, 6);
 						if (!patchCommitIds.contains(patchCommitId)) {
@@ -101,7 +113,12 @@ public class ParsePatchWorker extends UntypedActor {
 				}
 			}
 			numOfPatches = calculatePatches(allPatches);
-			analyzePatches(allPatches);
+			analyzePatches2(allPatches);
+			// by dale
+//			System.out.println(allPatches);
+//			if (!allPatches.isEmpty()){
+//				System.out.println(allPatches);
+//			}
 			
 			FileHelper.outputToFile(this.outputPath + "Patches/patchsFile" + workerId + ".txt", patchesBuilder, false);
 			patchesBuilder.setLength(0);
@@ -118,7 +135,13 @@ public class ParsePatchWorker extends UntypedActor {
 			workerMsg.patchCommitIds = patchCommitIds;
 			workerMsg.pureDelRootNodes = this.pureDelRootNodes;
 			
-			outputExpDepthData(this.outputPath + "examples/expDepth/" + workerId + ".txt");
+			// dale 
+			if(this.expDepthList.isEmpty()){
+				System.out.println("this.expDepthList.isEmpty() --- ");
+				System.out.println(allPatches);
+			}
+			
+			outputExpDepthData(this.outputPath + "examples/expDepth/" + workerId + ".txt", allPatches);
 
 			FileHelper.outputToFile(this.outputPath + "examples/TypeChanges/" + workerId + ".txt", typeChangeExamples, false);
 			typeChangeExamples.setLength(0);
@@ -141,6 +164,93 @@ public class ParsePatchWorker extends UntypedActor {
 		}
 	}
 	
+	/**
+	 * This is to output the operations
+	 * @param allPatches
+	 */
+	private void analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches) {
+		// each hunk
+		for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:allPatches.entrySet()){
+			DiffEntryHunk hunk = entry.getKey();
+			List<HierarchicalActionSet> hASList = entry.getValue();
+			for (HierarchicalActionSet hAS : hASList){
+				// operations based on string
+				String[] actLines = hAS.toString().split("\n");
+//				System.out.println(actLines + "\n\n");
+				int opCnt = 1;
+				List<Op> opList = new ArrayList<>();
+				int largestLevel = 0;
+				for(String actLine : actLines){
+					// is an op
+					if (actLine.substring(0,3).equals("---")){
+						Op op = new Op();
+						
+						// get level
+						int levInd = 0;
+						int level = 0;
+						while(actLine.substring(levInd, levInd+3).equals("---")){
+							levInd = levInd + 3;
+							level ++;
+						}
+						op.setLevel(level);
+						if (largestLevel <= level){
+							largestLevel = level;
+						}
+						
+						// get op
+						String operator = actLine.split(" ")[0].substring(3*level);
+						op.setOp(operator);
+
+						// get opName
+						op.setOpName("OP" + opCnt++);
+						
+						// get stmtType
+						op.setStmtType(actLine.split(" ")[1].split("@@")[0]);
+						
+						opList.add(op);
+					}else{ // not an op
+						System.out.println("not an op :" + actLine);
+					}
+				}
+				
+				// print
+				int tmpCnt = 1;
+				String strOpList = "";
+				for(Op op : opList){
+					// set parent
+					if (tmpCnt == 1){
+						op.setParentOpName("null");
+					}else{
+						// smaller level
+						int tmpCnt2 = tmpCnt;
+						while(opList.get(tmpCnt2-2).getLevel() == op.getLevel()){
+							tmpCnt2 --;
+						}
+						op.setParentOpName("OP" + (tmpCnt2 - 1));
+					}
+					// set child
+					if (op.getLevel() == largestLevel){
+						op.setChildOpName("null");
+					}else{
+						// larger level
+						int tmpCnt2 = tmpCnt;
+						while(opList.get(tmpCnt2).getLevel() == op.getLevel()){
+							tmpCnt2 ++;
+						}
+						op.setChildOpName("OP" + (tmpCnt2 + 1));
+					}
+					System.out.println(op.getOpName() + " :  " + op.toString());
+					strOpList += op.toString();
+					tmpCnt++;
+				}
+				
+				System.out.println("strOpList: \n" + strOpList);
+			}
+			System.out.println();
+		}
+		
+	}
+
 	private int calculatePatches(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches) {
 		int numOfPatches = 0;
 		for (Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry : allPatches.entrySet()) {
@@ -176,6 +286,8 @@ public class ParsePatchWorker extends UntypedActor {
 	private Map<String, Map<String, Integer>> expMaps = new HashMap<>();
 	private int expId = 0;
 	private List<String> expDepthList = new ArrayList<>();
+	// added by dale
+	private int exp_cnt = 0;
 	StringBuilder stmtTypeChangeExamples = new StringBuilder();
 	boolean outputTypeChangeExp = false;
 	boolean outputAddModifierExp = false;
@@ -755,7 +867,7 @@ public class ParsePatchWorker extends UntypedActor {
 		}
 	}
 
-	private void outputExpDepthData(String outputFileName) {
+	private void outputExpDepthData(String outputFileName, Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches) {
 		StringBuilder builder = new StringBuilder();
 		String startIndex = "--";
 		int deepestIndex = -1;
@@ -777,8 +889,18 @@ public class ParsePatchWorker extends UntypedActor {
 				deepestIndex = i;
 			}
 		}
-		builder.append(this.expDepthList.get(deepestIndex)).append("\n");
+		// by dale
+//		this.exp_cnt ++;
+//		System.out.println("expDepthList cnt: " +  ++ this.exp_cnt);
+		if (!this.expDepthList.isEmpty()){
+			builder.append(this.expDepthList.get(deepestIndex)).append("\n");
+			
+			FileHelper.outputToFile(outputFileName, builder, false);
+		}
+//		else{
+//			System.out.println("this.expDepthList.isEmpty()");
+//			System.out.println(allPatches);
+//		}
 		
-		FileHelper.outputToFile(outputFileName, builder, false);
 	}
 }

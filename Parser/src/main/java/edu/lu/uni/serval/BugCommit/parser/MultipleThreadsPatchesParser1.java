@@ -25,11 +25,16 @@ public class MultipleThreadsPatchesParser1 {
 	public void parse(String patchPath, String outputPath) {
 		int bugHunkSize = Configuration.sizeThreshold.get("buggy hunk");
 		int fixHunkSize = Configuration.sizeThreshold.get("fixed hunk");
-		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Linked");
-		msgFiles.addAll(readMessageFiles(patchPath, "Keywords"));
+		// dale comment
+//		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Linked");
+//		msgFiles.addAll(readMessageFiles(patchPath, "Keywords"));
+		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Keywords");
+		// dale add
+		
 		ActorSystem system = null;
 		ActorRef parsingActor = null;
-		int numberOfWorkers = 100;
+		// dale 1
+		int numberOfWorkers = 1; //00;
 		final WorkMessage msg = new WorkMessage(0, msgFiles);
 		try {
 //			log.info("Parsing begins...");
