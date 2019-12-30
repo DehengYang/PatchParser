@@ -51,10 +51,13 @@ public class ParsePatchWorker extends UntypedActor {
 		if (msg instanceof WorkMessage) {
 			WorkMessage workMsg = (WorkMessage) msg;
 			int workerId = workMsg.getId();
-			// dale
-			System.out.println("workerId: " + workerId);
+			
 			List<MessageFile> msgFiles = workMsg.getMsgFiles();
 			List<String> patchCommitIds = new ArrayList<>();
+			
+			// dale
+			System.out.println("workerId: " + workerId + "\nmsgFiles.size: " + msgFiles.size());
+			
 			int numOfPatches = 0;
 			int numOfHunks = 0;
 			int numOfDiff = 0;
@@ -94,6 +97,12 @@ public class ParsePatchWorker extends UntypedActor {
 						if (!patchCommitIds.contains(patchCommitId)) {
 							patchCommitIds.add(patchCommitId);
 						}
+						
+						// dale
+//						String patchInfo = "revFile:\n" + revFile.getName() + "patchCommitId:\n" + patchCommitId; 
+//						FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
+						List<String> allPatchStrList = analyzePatches2(patches, patchCommitId);
+						
 					}
 					allPatches.putAll(patches);
 					numOfHunks += parser.hunks;
@@ -117,7 +126,7 @@ public class ParsePatchWorker extends UntypedActor {
 			numOfPatches = calculatePatches(allPatches);
 //			analyzePatches(allPatches);
 			
-			List<String> allPatchStrList = analyzePatches2(allPatches, patchCommitId);
+//			List<String> allPatchStrList = analyzePatches2(allPatches, patchCommitId);
 			// TODO: add project name
 //			FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", allPatches.toString(), false);
 //			for (String str : allPatchStrList){
@@ -198,8 +207,10 @@ public class ParsePatchWorker extends UntypedActor {
 				int opCnt = 1;
 				List<Op> opList = new ArrayList<>();
 				int largestLevel = 0;
+				
 				for(String actLine : actLines){
 					// is an op
+					System.out.println("\n\nactLine:" + actLine+"\n\n");
 					if (actLine.substring(0,3).equals("---")){
 						Op op = new Op();
 						
@@ -241,13 +252,14 @@ public class ParsePatchWorker extends UntypedActor {
 					}else{
 						// smaller level
 						int tmpCnt2 = tmpCnt;
-						while(opList.get(tmpCnt2-2).getLevel() == op.getLevel()){
+						while (tmpCnt2 > 2){
+							if(opList.get(tmpCnt2-2).getLevel() < op.getLevel()){
+								op.setParentOpName("OP" + (tmpCnt2 - 1));
+								break;
+							}
 							tmpCnt2 --;
 						}
-						// consider two conditions
-						if(opList.get(tmpCnt2-2).getLevel() < op.getLevel()){
-							op.setParentOpName("OP" + (tmpCnt2 - 1));
-						}else{
+						if (op.getParentOpName() == null){
 							op.setParentOpName("null");
 						}
 					}
