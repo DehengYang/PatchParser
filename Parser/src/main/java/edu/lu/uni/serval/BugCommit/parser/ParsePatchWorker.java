@@ -211,7 +211,7 @@ public class ParsePatchWorker extends UntypedActor {
 				for(String actLine : actLines){
 					// is an op
 					System.out.println("\n\nactLine:" + actLine+"\n\n");
-					if (actLine.substring(0,3).equals("---")){
+					if (actLine.length() >= 3 && actLine.substring(0,3).equals("---")){
 						Op op = new Op();
 						
 						// get level
