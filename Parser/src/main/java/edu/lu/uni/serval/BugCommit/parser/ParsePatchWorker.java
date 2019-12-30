@@ -252,7 +252,7 @@ public class ParsePatchWorker extends UntypedActor {
 					}else{
 						// smaller level
 						int tmpCnt2 = tmpCnt;
-						while (tmpCnt2 > 2){
+						while (tmpCnt2 >= 2){ // fix: > to >=
 							if(opList.get(tmpCnt2-2).getLevel() < op.getLevel()){
 								op.setParentOpName("OP" + (tmpCnt2 - 1));
 								break;
