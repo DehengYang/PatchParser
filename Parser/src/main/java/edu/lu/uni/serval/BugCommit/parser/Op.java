@@ -1,5 +1,8 @@
 package edu.lu.uni.serval.BugCommit.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Op {
 	private int level; // parent, child
 	private String op; // UPD, MOV ...
@@ -7,7 +10,7 @@ public class Op {
 	
 	private String opName = null;
 	private String parentOpName = null;
-	private String childOpName = null;
+	private List<String> childOpNameList = new ArrayList<>();
 	public int getLevel() {
 		return level;
 	}
@@ -38,12 +41,6 @@ public class Op {
 	public void setParentOpName(String parentOpName) {
 		this.parentOpName = parentOpName;
 	}
-	public String getChildOpName() {
-		return childOpName;
-	}
-	public void setChildOpName(String childOpName) {
-		this.childOpName = childOpName;
-	}
 	
 	public String toString(){
 		String blank = "";
@@ -52,9 +49,22 @@ public class Op {
 			blank += "   ";
 			tmpLevel --; 
 		}
+		
+		String childOpName = "";
+		for (String name : childOpNameList){
+			childOpName = childOpName + " " + name;
+		}
+		childOpName = childOpName.trim();
+		
 		return opName + ":" + blank +"(" + op + ", " 
 				+ stmtType + ", "
 				+ parentOpName + ", "
 				+ childOpName + ")\n";
+	}
+	public List<String> getChildOpNameList() {
+		return childOpNameList;
+	}
+	public void setChildOpNameList(List<String> childOpNameList) {
+		this.childOpNameList = childOpNameList;
 	} 
 }

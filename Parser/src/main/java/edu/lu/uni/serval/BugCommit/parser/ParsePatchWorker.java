@@ -189,10 +189,11 @@ public class ParsePatchWorker extends UntypedActor {
 	 * @param patchCommitId 
 	 */
 	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId) {
-		// each hunk
+		// init && clear 
 		List<String> strOpListAll = new ArrayList<>();
 		FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
 		
+		// each hunk
 		for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:allPatches.entrySet()){
 			DiffEntryHunk hunk = entry.getKey();
 			List<HierarchicalActionSet> hASList = entry.getValue();
@@ -242,13 +243,13 @@ public class ParsePatchWorker extends UntypedActor {
 					}
 				}
 				
-				// print
-				int tmpCnt = 1;
+				// set parent and child op name
+				int tmpCnt = 1;  // record op cnt
 				String strOpList = "";
 				for(Op op : opList){
 					// set parent
-					if (tmpCnt == 1){
-						op.setParentOpName("null");
+					if (op.getLevel() == 1){ 
+						op.setParentOpName("null"); // all 1 level have no parent
 					}else{
 						// smaller level
 						int tmpCnt2 = tmpCnt;
@@ -263,21 +264,28 @@ public class ParsePatchWorker extends UntypedActor {
 							op.setParentOpName("null");
 						}
 					}
-					// set child
+					// set child 
+					List<String> childOpNameList = new ArrayList<>();
 					if (op.getLevel() == largestLevel || tmpCnt == opList.size()){  // debug
-						op.setChildOpName("null");
+						childOpNameList.add("null");
+						op.setChildOpNameList(childOpNameList); 
 					}else{
-						// larger level
+						// may have more than one child.
 						int tmpCnt2 = tmpCnt;
-						while(tmpCnt2 < opList.size() && opList.get(tmpCnt2).getLevel() == op.getLevel()){
+						while(tmpCnt2 < opList.size()){
+							int minus = opList.get(tmpCnt2).getLevel() - op.getLevel();
+							
+							if(minus == 0){ // stop to search child.
+								break;
+							}else if(minus == 1){
+								childOpNameList.add("OP" + (tmpCnt2 + 1));
+							}
 							tmpCnt2 ++;
 						}
-						// consider two conditions
-						if(tmpCnt2 < opList.size() && opList.get(tmpCnt2).getLevel() > op.getLevel()){
-							op.setChildOpName("OP" + (tmpCnt2 + 1));
-						}else{
-							op.setChildOpName("null");
+						if (childOpNameList.isEmpty()){
+							childOpNameList.add("null"); // add null
 						}
+						op.setChildOpNameList(childOpNameList); 
 					}
 					System.out.println(op.getOpName() + " :  " + op.toString());
 					strOpList += op.toString();
