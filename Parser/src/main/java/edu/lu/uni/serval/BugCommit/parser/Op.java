@@ -67,4 +67,8 @@ public class Op {
 	public void setChildOpNameList(List<String> childOpNameList) {
 		this.childOpNameList = childOpNameList;
 	} 
+	
+	public boolean equals(Object obj) {
+        return (this.toString().equals(obj.toString()));
+    }
 }

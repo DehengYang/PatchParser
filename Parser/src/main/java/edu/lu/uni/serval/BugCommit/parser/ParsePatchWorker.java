@@ -2,6 +2,8 @@ package edu.lu.uni.serval.BugCommit.parser;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +69,8 @@ public class ParsePatchWorker extends UntypedActor {
 			Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches = new HashMap<>();
 			// dale
 			String patchCommitId = null;
+			// dale for collect fix patterns
+			Map<String, Integer> opCntMap = new HashMap<>();
 			
 			for (MessageFile msgFile : msgFiles) {
 				File revFile = msgFile.getRevFile();
@@ -101,7 +105,7 @@ public class ParsePatchWorker extends UntypedActor {
 						// dale
 //						String patchInfo = "revFile:\n" + revFile.getName() + "patchCommitId:\n" + patchCommitId; 
 //						FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
-						List<String> allPatchStrList = analyzePatches2(patches, patchCommitId);
+						List<String> allPatchStrList = analyzePatches2(patches, patchCommitId, opCntMap);
 						
 					}
 					allPatches.putAll(patches);
@@ -124,6 +128,39 @@ public class ParsePatchWorker extends UntypedActor {
 				}
 			}
 			numOfPatches = calculatePatches(allPatches);
+			
+			// save to file : opCntMap
+			String FPPath = this.outputPath + "FixPatternFreqs.txt";
+			FileHelper.outputToFile(FPPath, "", false);
+			
+			// sort based on cnt, i.e., frequency
+			List<Map.Entry<String, Integer>> opCntList = new ArrayList<Map.Entry<String, Integer>>(opCntMap.entrySet());
+			Collections.sort(opCntList, new Comparator<Map.Entry<String, Integer>>() {
+				public int compare(Map.Entry<String, Integer> o1,
+						Map.Entry<String, Integer> o2) {
+					return (o2.getValue()).compareTo(o1.getValue());
+				} // in descending order. 
+			});
+	 
+			for (int i = 0; i < opCntList.size(); i++) {
+				String opStr = opCntList.get(i).getKey();
+				int cnt = opCntList.get(i).getValue();
+				FileHelper.outputToFile(FPPath, "Freq: " + cnt + "\n", true);
+				if(cnt >= 2){
+					System.out.println(cnt); //print
+				}
+				FileHelper.outputToFile(FPPath, opStr + "\n", true);
+			}
+//			for (Map.Entry<String, Integer> entry : opCntMap.entrySet()){
+//				String opStr = entry.getKey();
+//				int cnt = entry.getValue();
+//				FileHelper.outputToFile(FPPath, cnt + "\n", true);
+//				if(cnt >= 2){
+//					System.out.println(cnt); //print
+//				}
+//				FileHelper.outputToFile(FPPath, opStr, true);
+//			}
+			
 //			analyzePatches(allPatches);
 			
 //			List<String> allPatchStrList = analyzePatches2(allPatches, patchCommitId);
@@ -155,10 +192,10 @@ public class ParsePatchWorker extends UntypedActor {
 			workerMsg.pureDelRootNodes = this.pureDelRootNodes;
 			
 //			// dale 
-			if(this.expDepthList.isEmpty()){
-				System.out.println("this.expDepthList.isEmpty() --- ");
-				System.out.println(allPatches);
-			}
+//			if(this.expDepthList.isEmpty()){
+//				System.out.println("this.expDepthList.isEmpty() --- ");
+//				System.out.println(allPatches);
+//			}
 			
 			outputExpDepthData(this.outputPath + "examples/expDepth/" + workerId + ".txt", allPatches);
 
@@ -187,18 +224,23 @@ public class ParsePatchWorker extends UntypedActor {
 	 * This is to output the operations
 	 * @param allPatches
 	 * @param patchCommitId 
+	 * @param opCntMap 
 	 */
-	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId) {
+	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId, Map<String, Integer> opCntMap) {
 		// init && clear 
 		List<String> strOpListAll = new ArrayList<>();
-		FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
+		String CIIPath = this.outputPath + "CII/" + patchCommitId + ".txt";
+		String CIIPurePath = this.outputPath + "CII-pure/" + patchCommitId + ".txt"; // only collect CII info.
+		FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false); // including CII, hunk and hAS info.
+		FileHelper.outputToFile(CIIPurePath, "", false);
 		
 		// each hunk
 		for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:allPatches.entrySet()){
 			DiffEntryHunk hunk = entry.getKey();
 			List<HierarchicalActionSet> hASList = entry.getValue();
 			
-			System.out.println("hunk:\n" + hunk.toString() + "hASList: \n" + hASList.toString());
+			// print hunk info 
+			//System.out.println("hunk:\n" + hunk.toString() + "hASList: \n" + hASList.toString());
 			FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "hunk:\n" + hunk.toString() + "\n\n\nhASList: \n" + hASList.toString() + "\n\n\n", true);
 			
 			for (HierarchicalActionSet hAS : hASList){
@@ -211,7 +253,8 @@ public class ParsePatchWorker extends UntypedActor {
 				
 				for(String actLine : actLines){
 					// is an op
-					System.out.println("\n\nactLine:" + actLine+"\n\n");
+					// print actLine info 
+					// System.out.println("\n\nactLine:" + actLine+"\n\n");
 					if (actLine.length() >= 3 && actLine.substring(0,3).equals("---")){
 						Op op = new Op();
 						
@@ -239,7 +282,8 @@ public class ParsePatchWorker extends UntypedActor {
 						
 						opList.add(op);
 					}else{ // not an op
-						System.out.println("not an op :" + actLine);
+						// just a print
+						//System.out.println("not an op :" + actLine);
 					}
 				}
 				
@@ -287,15 +331,27 @@ public class ParsePatchWorker extends UntypedActor {
 						}
 						op.setChildOpNameList(childOpNameList); 
 					}
-					System.out.println(op.getOpName() + " :  " + op.toString());
+					// print op info 
+					//System.out.println(op.getOpName() + " :  " + op.toString());
 					strOpList += op.toString();
 					tmpCnt++;
 				}
 				
-				System.out.println("strOpList: \n" + strOpList);
+				// print opStr info 
+				//System.out.println("strOpList: \n" + strOpList);
 				strOpListAll.add(strOpList);
 				
-				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "CII:\n" + strOpList + "\n\n\n", true);
+				// get frequencies of fix patterns
+				if( ! opCntMap.containsKey(strOpList)) {
+					opCntMap.put(strOpList, 1);
+				}else{
+					int cnt = opCntMap.get(strOpList);
+					opCntMap.put(strOpList, cnt + 1);
+				}
+				
+				
+				FileHelper.outputToFile(CIIPath, "CII:\n" + strOpList + "\n\n\n", true);
+				FileHelper.outputToFile(CIIPurePath, strOpList + "\n\n", true);
 			}
 //			System.out.println();
 //			for (String str : strOpListAll){
