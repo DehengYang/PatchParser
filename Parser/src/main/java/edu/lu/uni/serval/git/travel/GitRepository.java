@@ -234,6 +234,8 @@ public class GitRepository {
 		 */
 		String shortMessage = commit.getShortMessage().toLowerCase(); 
 		String fullMessage = commit.getFullMessage().toLowerCase();
+		// dale
+//		String commitStr = commit.toString();
 		List<String> bugRelatedWords = BugRelatedWords.BUG_RELATED_KEY_WORDS;
 		
 		for (String relatedWord : bugRelatedWords) {
@@ -905,7 +907,7 @@ public class GitRepository {
 		log.info("All modified java files: " + a + "=========All Non-test java files:" + b + "==========Unchanged non-test java files: " + c);
 	}
 	
-	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries) throws MissingObjectException, IOException	{
+	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, Map<Integer, List<String>> diffMap) throws MissingObjectException, IOException	{
 		String fileName = null;
 		String revisedFileContent = null;
 		String previousFileContent = null;
@@ -964,6 +966,32 @@ public class GitRepository {
 					}
 					FileHelper.outputToFile(outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"), diffentryStr, false);
 					b ++;
+					
+					String diffEntry = "" + diffentryStr;
+					diffEntry = diffEntry.replace("\n", "");
+					
+					for(Map.Entry<Integer, List<String>> entry : diffMap.entrySet()){
+						int id = entry.getKey();
+						List<String> diffHunks = entry.getValue();
+						int isThisCommitFlag = 0;
+						for (String diffHunk : diffHunks){
+							if (diffEntry.indexOf(diffHunk) == -1){
+								break; // not contain 
+							}else{
+								isThisCommitFlag++;
+							}
+						}
+						
+						// is this commit
+						if (isThisCommitFlag > 0){
+							System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, parentCommitId);
+						}else{
+//							System.out.println("-------");
+						}
+						
+					}
+					
+					
 				}
 			}
 		}

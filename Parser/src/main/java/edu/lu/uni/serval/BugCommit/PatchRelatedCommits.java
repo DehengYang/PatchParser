@@ -38,40 +38,52 @@ public class PatchRelatedCommits {
 			try {
 				System.out.println("\nProject: " + repoName);
 				gitRepo.open();
-				List<RevCommit> commits = gitRepo.getAllCommits(false);
-				System.out.println("All Commits: " + commits.size());
-				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
+				
+				List<RevCommit> keywordPatchCommits = gitRepo.getAllCommits(false);
+				System.out.println("All Commits: " + keywordPatchCommits.size());
+//				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
+				
+				// dale comment here
+//				List<RevCommit> commits = gitRepo.getAllCommits(false);
+//				System.out.println("All Commits: " + commits.size());
+//				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
 //				System.out.println("Keywords Patch Commits: " + keywordPatchCommits.size());
 				List<RevCommit> linkedPatchCommits;  // searched by bugId. "Bug"
 				String bugId = map.get(repoName);
-				if (bugId == null) {
-					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, "LUCENE-", "SOLR-");
-				} else {
-					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, bugId);
-				}
+				// dale comment
+//				if (bugId == null) {
+//					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, "LUCENE-", "SOLR-");
+//				} else {
+//					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, bugId);
+//				}
 //				System.out.println("Bug-report Linked Patch Commits: " + linkedPatchCommits.size());
-				List<RevCommit> keyworkAndLinkedPatchCommits;
-				if (bugId == null) {
-					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, "LUCENE-", "SOLR-");
-				} else {
-					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, bugId);
-				}
-				keywordPatchCommits.removeAll(keyworkAndLinkedPatchCommits);
+//				List<RevCommit> keyworkAndLinkedPatchCommits;
+//				if (bugId == null) {
+//					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, "LUCENE-", "SOLR-");
+//				} else {
+//					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, bugId);
+//				}
+				// dale comment 
+//				keywordPatchCommits.removeAll(keyworkAndLinkedPatchCommits);
 //				System.out.println("Keywords-matching and unlinked Patch Commits: " + keywordPatchCommits.size());
-				System.out.println("All collected patch-related Commits: " + (linkedPatchCommits.size() + keywordPatchCommits.size()));
+//				System.out.println("All collected patch-related Commits: " + (linkedPatchCommits.size() + keywordPatchCommits.size()));
 				
 				// previous java file vs. modified java file
 //				System.out.println("Create revised Java files and previous Java files that contains code changes patch parsing with GumTree.");
-				List<CommitDiffEntry> linkedPatchCommitDiffentries = gitRepo.getCommitDiffEntries(linkedPatchCommits);
-				gitRepo.createFilesForGumTree(outputPath + "Linked/" + repoName + "/", linkedPatchCommitDiffentries);
+//				List<CommitDiffEntry> linkedPatchCommitDiffentries = gitRepo.getCommitDiffEntries(linkedPatchCommits);
+//				gitRepo.createFilesForGumTree(outputPath + "Linked/" + repoName + "/", linkedPatchCommitDiffentries);
+				
+				//dale: get all chart bugs diff info 
+				BugDiff bugDiff = new BugDiff();
+				Map<Integer, List<String>>  diffMap = bugDiff.getChart();
 				
 				List<CommitDiffEntry> unlinkedPatchCommitDiffentries = gitRepo.getCommitDiffEntries(keywordPatchCommits);
-				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "/", unlinkedPatchCommitDiffentries);
+				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "/", unlinkedPatchCommitDiffentries, diffMap);
 				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_Keywords.txt", keywordPatchCommits);
-				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_Linked.txt", linkedPatchCommits);
+//				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_Linked.txt", linkedPatchCommits);
 				
-				outputCommitIds(outputPath + "CommitIds/" + repoName + "_Keywords.txt", keywordPatchCommits);
-				outputCommitIds(outputPath + "CommitIds/" + repoName + "_Linked.txt", linkedPatchCommits);
+//				outputCommitIds(outputPath + "CommitIds/" + repoName + "_Keywords.txt", keywordPatchCommits);
+//				outputCommitIds(outputPath + "CommitIds/" + repoName + "_Linked.txt", linkedPatchCommits);
 			} catch (GitRepositoryNotFoundException e) {
 				e.printStackTrace();
 			} catch (NotValidGitRepositoryException e) {

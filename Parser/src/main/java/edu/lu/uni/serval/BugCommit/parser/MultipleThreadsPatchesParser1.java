@@ -28,7 +28,7 @@ public class MultipleThreadsPatchesParser1 {
 		// dale comment
 //		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Linked");
 //		msgFiles.addAll(readMessageFiles(patchPath, "Keywords"));
-		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Keywords");
+		List<MessageFile> msgFiles = readMessageFiles2(patchPath, "Keywords");
 		// dale add
 		
 		ActorSystem system = null;
@@ -47,6 +47,31 @@ public class MultipleThreadsPatchesParser1 {
 		}
 	}
 
+	// dale : read Chart buggy and fixed files
+	// ../data/PatchCommits/Keywords/jfreechart   Chart/1/
+	private List<MessageFile> readMessageFiles2(String path, String dataType) {
+		List<MessageFile> msgFiles = new ArrayList<>();
+		File[] projects = new File(path + dataType).listFiles();
+		for (File project : projects) {
+			if (project.isDirectory()) {
+				String projId = "/Chart/1/";
+				String projectPath = project.getPath();
+				File revFilesPath = new File(projectPath + projId);
+				File[] revFiles = revFilesPath.listFiles();   // project folders
+				
+				for (File revFile : revFiles) {
+					if (revFile.getName().startsWith("fixed-")) {
+						String fileName = revFile.getName();
+						File prevFile = new File(projectPath + projId + fileName.replace("fixed-", "buggy-"));// previous file
+						File diffentryFile = new File(projectPath + projId + "diffInfo.txt"); // DiffEntry file
+						MessageFile msgFile = new MessageFile(revFile, prevFile, diffentryFile);
+						msgFiles.add(msgFile);
+					}
+				}
+			}
+		}
+		return msgFiles;
+	}
 	
 	private List<MessageFile> readMessageFiles(String path, String dataType) {
 		List<MessageFile> msgFiles = new ArrayList<>();
