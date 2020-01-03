@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Configuration {
-	
 	public static final String BUG_REPORT_URL = "https://issues.apache.org/jira/browse/";
 	public static final String SUBJECTS_PATH = "../subjects/";
 	private static final String OUTPUT_PATH = "../data/";
@@ -13,6 +12,15 @@ public class Configuration {
 	public static final String DIFFENTRY_SIZE_PATH = OUTPUT_PATH + "DiffentrySizes/";
 	public static final String PARSE_RESULTS_PATH = OUTPUT_PATH + "ParseResults/";
 	public static final long TIMEOUT_THRESHOLD = 1800L;
+	
+	// dale: get current dir path
+	// /home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/Parser
+	public static final String HOME = System.getProperty("user.dir") + "/";
+	public static final String BUGS = OUTPUT_PATH + "bugs/";
+	public static final String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
+	public static String PROJ_BUG = "Chart";
+	public static String PROJECT = "jfreechart";
+	public static String ID = "14";
 
 	public static Map<String, Integer> numOfWorkers = new HashMap<>();
 	public static Map<String, Integer> sizeThreshold = new HashMap<>();

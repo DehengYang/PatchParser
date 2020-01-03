@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.BugCommit.parser;
 
 import java.io.File;
+import java.util.Date;
 
 public class MessageFile {
 	
@@ -8,6 +9,16 @@ public class MessageFile {
 	private File prevFile;
 	private File diffEntryFile;
 	private File positionFile;
+	//dale
+	private String proj = null;
+	private String id = null;
+	private Date commitTime = new Date();
+	
+	public MessageFile(File revFile, File prevFile) {
+		super();
+		this.revFile = revFile;
+		this.prevFile = prevFile;
+	}
 	
 	public MessageFile(File revFile, File prevFile, File diffEntryFile) {
 		super();
@@ -34,6 +45,30 @@ public class MessageFile {
 
 	public void setPositionFile(File positionFile) {
 		this.positionFile = positionFile;
+	}
+
+	public String getProj() {
+		return proj;
+	}
+
+	public void setProj(String proj) {
+		this.proj = proj;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public Date getCommitTime() {
+		return commitTime;
+	}
+
+	public void setCommitTime(Date commitTime) {
+		this.commitTime = commitTime;
 	}
 	
 }

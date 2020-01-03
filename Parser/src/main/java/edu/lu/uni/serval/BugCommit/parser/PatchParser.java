@@ -36,7 +36,14 @@ public class PatchParser {
 	public int zeroG = 0;
 	public int overRap = 0;
 	
-	public void parsePatches(File prevFile, File revFile, File diffentryFile, int bugHunkSize, int fixHunkSize) {
+	private List<HierarchicalActionSet> actionSets = new ArrayList<>();
+	
+	public void parsePatches(File prevFile, File revFile, File diffentryFile, int bugHunkSize, int fixHunkSize, String idFlag) {
+		if(idFlag != null){
+			this.setActionSets(parseChangedSourceCodeWithGumTree(prevFile, revFile));
+			return;
+		}
+		
 		// GumTree results 
 		List<HierarchicalActionSet> actionSets = parseChangedSourceCodeWithGumTree(prevFile, revFile);
 		if (actionSets != null && actionSets.size() > 0) { 
@@ -319,6 +326,14 @@ public class PatchParser {
 
 	public Map<DiffEntryHunk, List<HierarchicalActionSet>> getPatches() {
 		return patches;
+	}
+
+	public List<HierarchicalActionSet> getActionSets() {
+		return actionSets;
+	}
+
+	public void setActionSets(List<HierarchicalActionSet> actionSets) {
+		this.actionSets.addAll(actionSets);
 	}
 
 }

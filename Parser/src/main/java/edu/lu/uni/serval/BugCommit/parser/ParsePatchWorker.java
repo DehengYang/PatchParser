@@ -1,9 +1,12 @@
 package edu.lu.uni.serval.BugCommit.parser;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import edu.lu.uni.serval.Configuration;
+import edu.lu.uni.serval.BugCommit.BugDiff;
 import edu.lu.uni.serval.diffentry.DiffEntryHunk;
 import edu.lu.uni.serval.gumtree.regroup.HierarchicalActionSet;
 import edu.lu.uni.serval.utils.FileHelper;
@@ -70,7 +74,41 @@ public class ParsePatchWorker extends UntypedActor {
 			// dale
 			String patchCommitId = null;
 			// dale for collect fix patterns
-			Map<String, Integer> opCntMap = new HashMap<>();
+			Map<String, Pair<Integer, List<String>>> opCntMap = new HashMap<>();
+			
+			// collect D4J bug CII
+			List<String> CCIList = new ArrayList<>();
+			
+			// TODO: clear CII file.
+			// not right.
+			FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII-info");
+			FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII");
+			
+			// get Proj_id time
+			String commitTimePath = Configuration.BUGS + Configuration.PROJ_BUG + "/"
+					+ Configuration.ID + "/"; //CommitId-
+			File commitTimePathFile = new File(commitTimePath);
+			File[] files =  commitTimePathFile.listFiles();
+			List<String> timeList =  new ArrayList<>();
+			Date commitTime = new Date();
+			for(File file : files){
+				if(file.getName().startsWith("CommitId-")){ // records time.
+					String[] timeLines = FileHelper.readFile(file).trim().split("\n");
+					for(String timeLine : timeLines){
+//						CommitTime commitTime = new CommitTime(timeLine);
+						if(!timeList.contains(timeLine)){
+							timeList.add(timeLine);
+							timeLine = timeLine.split("\\+")[0].trim();
+							SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							commitTime = format.parse(timeLine);
+						}
+					}
+					
+					if(timeList.size() > 1){
+						FileHelper.outputToFile(commitTimePath + "timeError", "", false);
+					}
+				}
+			}
 			
 			for (MessageFile msgFile : msgFiles) {
 				File revFile = msgFile.getRevFile();
@@ -81,38 +119,38 @@ public class ParsePatchWorker extends UntypedActor {
 				
 				final ExecutorService executor = Executors.newSingleThreadExecutor();
 				// schedule the work
-				final Future<?> future = executor.submit(new RunnableParser(prevFile, revFile, diffentryFile, parser, bugHunkSize, fixHunkSize));
+				final Future<?> future = executor.submit(new RunnableParser(prevFile, revFile, diffentryFile, parser, bugHunkSize, fixHunkSize, msgFile.getId()));
+				
 				try {
 					// wait for task to complete
 					future.get(Configuration.TIMEOUT_THRESHOLD, TimeUnit.SECONDS);
-					Map<DiffEntryHunk, List<HierarchicalActionSet>> patches = parser.getPatches();
 					
-					// dale print
-					int cnt = 1;
-					for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:patches.entrySet()){
-//						System.out.println("\nhunk:" + hunk + "\n");
-						DiffEntryHunk hunk = entry.getKey();
-						List<HierarchicalActionSet> hAS = entry.getValue();
-//						System.out.println(cnt++);
-					}
-					
-					if (patches.size() > 0) {
-						patchCommitId = revFile.getName().substring(0, 6);
-						if (!patchCommitIds.contains(patchCommitId)) {
-							patchCommitIds.add(patchCommitId);
+					if (msgFile.getId() == null && msgFile.getCommitTime().compareTo(commitTime) < 0 ){
+						Map<DiffEntryHunk, List<HierarchicalActionSet>> patches = parser.getPatches();
+						
+						if (patches.size() > 0) {
+							patchCommitId = revFile.getName().substring(0, 6);
+							if (!patchCommitIds.contains(patchCommitId)) {
+								patchCommitIds.add(patchCommitId);
+							}
+							
+							// dale
+							List<String> allPatchStrList = analyzePatches2(patches, patchCommitId, opCntMap);
 						}
+						allPatches.putAll(patches);
+						numOfHunks += parser.hunks;
+						numOfDiff += parser.diffs;
+						zeroG += parser.zeroG;
+						overRap += parser.overRap;
+					}else{ // for buggy programs in D4J
+//						Map<DiffEntryHunk, List<HierarchicalActionSet>> patches = parser.getPatches();
+//						for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry : patches.entrySet()){
+//							analyzePatches3(entry.getValue(), msgFile.getProj(), msgFile.getId()); 
+//						}
 						
-						// dale
-//						String patchInfo = "revFile:\n" + revFile.getName() + "patchCommitId:\n" + patchCommitId; 
-//						FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", "", false);
-						List<String> allPatchStrList = analyzePatches2(patches, patchCommitId, opCntMap);
-						
+						List<HierarchicalActionSet> hASList = parser.getActionSets();
+						analyzePatches3(hASList, msgFile.getProj(), msgFile.getId(), CCIList);  //List<String> d4jPatchStrList =
 					}
-					allPatches.putAll(patches);
-					numOfHunks += parser.hunks;
-					numOfDiff += parser.diffs;
-					zeroG += parser.zeroG;
-					overRap += parser.overRap;
 				} catch (TimeoutException e) {
 					future.cancel(true);
 					System.err.println("#Timeout: " + revFile.getName());
@@ -130,55 +168,54 @@ public class ParsePatchWorker extends UntypedActor {
 			numOfPatches = calculatePatches(allPatches);
 			
 			// save to file : opCntMap
-			String FPPath = this.outputPath + "FixPatternFreqs.txt";
+			String FPPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" 
+					+ Configuration.ID + "/FixPatternFreqs.txt";
 			FileHelper.outputToFile(FPPath, "", false);
 			
 			// sort based on cnt, i.e., frequency
-			List<Map.Entry<String, Integer>> opCntList = new ArrayList<Map.Entry<String, Integer>>(opCntMap.entrySet());
-			Collections.sort(opCntList, new Comparator<Map.Entry<String, Integer>>() {
-				public int compare(Map.Entry<String, Integer> o1,
-						Map.Entry<String, Integer> o2) {
-					return (o2.getValue()).compareTo(o1.getValue());
+			List<Map.Entry<String, Pair<Integer, List<String>>>> opCntList = new ArrayList<Map.Entry<String, Pair<Integer, List<String>>>>(opCntMap.entrySet());
+			Collections.sort(opCntList, new Comparator<Map.Entry<String, Pair<Integer, List<String>>>>() {
+				public int compare(Map.Entry<String, Pair<Integer, List<String>>> o1,
+						Map.Entry<String, Pair<Integer, List<String>>> o2) {
+					return (o2.getValue().getFirst()).compareTo(o1.getValue().getFirst());
 				} // in descending order. 
 			});
 	 
 			for (int i = 0; i < opCntList.size(); i++) {
 				String opStr = opCntList.get(i).getKey();
-				int cnt = opCntList.get(i).getValue();
-				FileHelper.outputToFile(FPPath, "Freq: " + cnt + "\n", true);
-				if(cnt >= 2){
-					System.out.println(cnt); //print
+								
+				int cnt = opCntList.get(i).getValue().getFirst();
+				
+				String ids = "";
+				for(String id : opCntList.get(i).getValue().getSecond()){
+					ids += id + " ";
 				}
-				FileHelper.outputToFile(FPPath, opStr + "\n", true);
-			}
-//			for (Map.Entry<String, Integer> entry : opCntMap.entrySet()){
-//				String opStr = entry.getKey();
-//				int cnt = entry.getValue();
-//				FileHelper.outputToFile(FPPath, cnt + "\n", true);
+				
+				FileHelper.outputToFile(FPPath, "Freq: " + cnt + "\nCommitIds: " + ids + "\n", true);
 //				if(cnt >= 2){
 //					System.out.println(cnt); //print
 //				}
-//				FileHelper.outputToFile(FPPath, opStr, true);
-//			}
+				FileHelper.outputToFile(FPPath, opStr + "\n", true);
+			}
 			
-//			analyzePatches(allPatches);
-			
-//			List<String> allPatchStrList = analyzePatches2(allPatches, patchCommitId);
-			// TODO: add project name
-//			FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", allPatches.toString(), false);
-//			for (String str : allPatchStrList){
-//				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", str, true);
-//			}
-			// by dale
-//			System.out.println(allPatches);
-//			if (!allPatches.isEmpty()){
-//				System.out.println(allPatches);
-//			}
-			
-			// dale comment
-//			FileHelper.outputToFile(this.outputPath + "Patches/patchsFile" + workerId + ".txt", patchesBuilder, false);
-//			patchesBuilder.setLength(0);
-//			
+			// match CCI
+			String matchCCI = "";
+			for (int cnt = 0; cnt < CCIList.size(); cnt++){
+				String CCI = CCIList.get(cnt);
+				if(opCntMap.keySet().contains(CCI)){
+					System.out.println("No." + cnt + " CCI matched.");
+					matchCCI += "No." + cnt + " CCI matched.\n" ;
+					
+					int freq = opCntMap.get(CCI).getFirst();
+					String ids = "";
+					for(String id : opCntMap.get(CCI).getSecond()){
+						ids += id + " ";
+					}
+					matchCCI += "freq: " + freq + "\nCommitIds: " + ids;
+				}
+			}
+			FileHelper.outputToFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID + "/matchResult.txt", matchCCI, false);
+
 			WorkerReturnMessage workerMsg = new WorkerReturnMessage(numOfPatches, this.stmtMaps, this.elementsMaps);
 			workerMsg.diffs = numOfDiff;
 			workerMsg.hunks = numOfHunks;
@@ -190,12 +227,6 @@ public class ParsePatchWorker extends UntypedActor {
 			workerMsg.stmtBuggyElementTypesMaps = this.stmtBuggyElementTypesMaps;
 			workerMsg.patchCommitIds = patchCommitIds;
 			workerMsg.pureDelRootNodes = this.pureDelRootNodes;
-			
-//			// dale 
-//			if(this.expDepthList.isEmpty()){
-//				System.out.println("this.expDepthList.isEmpty() --- ");
-//				System.out.println(allPatches);
-//			}
 			
 			outputExpDepthData(this.outputPath + "examples/expDepth/" + workerId + ".txt", allPatches);
 
@@ -226,7 +257,7 @@ public class ParsePatchWorker extends UntypedActor {
 	 * @param patchCommitId 
 	 * @param opCntMap 
 	 */
-	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId, Map<String, Integer> opCntMap) {
+	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId, Map<String, Pair<Integer, List<String>>> opCntMap) {
 		// init && clear 
 		List<String> strOpListAll = new ArrayList<>();
 		String CIIPath = this.outputPath + "CII/" + patchCommitId + ".txt";
@@ -343,12 +374,15 @@ public class ParsePatchWorker extends UntypedActor {
 				
 				// get frequencies of fix patterns
 				if( ! opCntMap.containsKey(strOpList)) {
-					opCntMap.put(strOpList, 1);
+					opCntMap.put(strOpList, new Pair<>(1, Arrays.asList(patchCommitId)));
 				}else{
-					int cnt = opCntMap.get(strOpList);
-					opCntMap.put(strOpList, cnt + 1);
+					Pair<Integer, List<String>> pair = opCntMap.get(strOpList);
+					int addCnt = pair.getFirst()+1;
+					List<String> ids = new ArrayList<>();
+					ids.addAll(pair.getSecond());
+					ids.add(patchCommitId);
+					opCntMap.put(strOpList, new Pair<>(addCnt, ids));
 				}
-				
 				
 				FileHelper.outputToFile(CIIPath, "CII:\n" + strOpList + "\n\n\n", true);
 				FileHelper.outputToFile(CIIPurePath, strOpList + "\n\n", true);
@@ -360,6 +394,126 @@ public class ParsePatchWorker extends UntypedActor {
 		}
 		return strOpListAll;
 		
+	}
+	
+	private void analyzePatches3(List<HierarchicalActionSet> hASList, String proj, String id, List<String> CCIList) {
+		// init && clear 
+		for (HierarchicalActionSet hAS : hASList){
+			// operations based on string
+			// TODO: not sure if this is ok. just a temporary solution.
+			String[] actLines = (hAS.toString()).split("\n");
+			int opCnt = 1;
+			List<Op> opList = new ArrayList<>();
+			int largestLevel = 0;
+			
+			for(String actLine : actLines){
+				if(actLine.length() > 4 && (actLine.substring(0,4).equals("INS ") || actLine.substring(0,4).equals("DEL ")
+						|| actLine.substring(0,4).equals("UPD ") || actLine.substring(0,4).equals("MOV "))){
+					Op op = new Op();
+					op.setLevel(1);
+					
+					// get op
+					String operator = actLine.split(" ")[0];
+					op.setOp(operator);
+
+					// get opName
+					op.setOpName("OP" + opCnt++);
+					
+					// get stmtType
+					op.setStmtType(actLine.split(" ")[1].split("@@")[0]);
+					
+					opList.add(op);
+				}
+				// is an op
+				else if (actLine.length() >= 3 && actLine.substring(0,3).equals("---")){
+					Op op = new Op();
+					
+					// get level
+					int levInd = 0;
+					int level = 0;
+					while(actLine.substring(levInd, levInd+3).equals("---")){
+						levInd = levInd + 3;
+						level ++;
+					}
+					op.setLevel(level + 1); //sepcial 1 for D4J bug
+					if (largestLevel <= level){
+						largestLevel = level;
+					}
+					
+					// get op
+					String operator = actLine.split(" ")[0].substring(3*level);
+					op.setOp(operator);
+
+					// get opName
+					op.setOpName("OP" + opCnt++);
+					
+					// get stmtType
+					op.setStmtType(actLine.split(" ")[1].split("@@")[0]);
+					
+					opList.add(op);
+				}else{ // not an op
+					// just a print
+					//System.out.println("not an op :" + actLine);
+				}
+			}
+			
+			// set parent and child op name
+			int tmpCnt = 1;  // record op cnt
+			String strOpList = "";
+			for(Op op : opList){
+				// set parent
+				if (op.getLevel() == 1){ 
+					op.setParentOpName("null"); // all 1 level have no parent
+				}else{
+					// smaller level
+					int tmpCnt2 = tmpCnt;
+					while (tmpCnt2 >= 2){ // fix: > to >=
+						if(opList.get(tmpCnt2-2).getLevel() < op.getLevel()){
+							op.setParentOpName("OP" + (tmpCnt2 - 1));
+							break;
+						}
+						tmpCnt2 --;
+					}
+					if (op.getParentOpName() == null){
+						op.setParentOpName("null");
+					}
+				}
+				// set child 
+				List<String> childOpNameList = new ArrayList<>();
+				if (op.getLevel() == largestLevel || tmpCnt == opList.size()){  // debug
+					childOpNameList.add("null");
+					op.setChildOpNameList(childOpNameList); 
+				}else{
+					// may have more than one child.
+					int tmpCnt2 = tmpCnt;
+					while(tmpCnt2 < opList.size()){
+						int minus = opList.get(tmpCnt2).getLevel() - op.getLevel();
+						
+						if(minus == 0){ // stop to search child.
+							break;
+						}else if(minus == 1){
+							childOpNameList.add("OP" + (tmpCnt2 + 1));
+						}
+						tmpCnt2 ++;
+					}
+					if (childOpNameList.isEmpty()){
+						childOpNameList.add("null"); // add null
+					}
+					op.setChildOpNameList(childOpNameList); 
+				}
+				// print op info 
+				strOpList += op.toString();
+				tmpCnt++;
+			}
+			// print opStr info 
+			//System.out.println("strOpList: \n" + strOpList);
+			CCIList.add(strOpList);
+			
+			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CII-info", 
+					"\n\nhASList: \n" + hASList.toString() + "\n\n"
+					+ "CII:\n" + strOpList + "\n\n\n", true);
+			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CII", strOpList + "\n\n", true);
+		}
 	}
 
 	private int calculatePatches(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches) {

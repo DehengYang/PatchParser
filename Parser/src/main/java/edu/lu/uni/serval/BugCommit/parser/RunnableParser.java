@@ -11,17 +11,21 @@ public class RunnableParser implements Runnable {
 	private int bugHunkSize;
 	private int fixHunkSize;
 	
-	public RunnableParser(File prevFile, File revFile, File diffentryFile, PatchParser parser, int bugHunkSize, int fixHunkSize) {
+	// dale: not null -> proj_id commit
+	private String idFlag;
+	
+	public RunnableParser(File prevFile, File revFile, File diffentryFile, PatchParser parser, int bugHunkSize, int fixHunkSize, String idFlag) {
 		this.prevFile = prevFile;
 		this.revFile = revFile;
 		this.diffentryFile = diffentryFile;
 		this.parser = parser;
 		this.bugHunkSize = bugHunkSize;
 		this.fixHunkSize = fixHunkSize;
+		this.idFlag = idFlag;
 	}
 
 	@Override
 	public void run() {
-		parser.parsePatches(prevFile, revFile, diffentryFile, bugHunkSize, fixHunkSize);
+		parser.parsePatches(prevFile, revFile, diffentryFile, bugHunkSize, fixHunkSize, idFlag);
 	}
 }

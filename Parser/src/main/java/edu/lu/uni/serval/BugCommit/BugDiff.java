@@ -5,7 +5,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import edu.lu.uni.serval.Configuration;
 import edu.lu.uni.serval.utils.FileHelper;
 
 /*
@@ -24,23 +28,36 @@ import edu.lu.uni.serval.utils.FileHelper;
  * 
  */
 public class BugDiff {
+	public static Date getCommitTime(String commitId) throws IOException, ParseException{
+		String[] cmd = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
+				+ " && " + " git show -s --format=%ci " 
+				+ commitId
+				};
+		String gitTime = BugDiff.shellRun2(cmd).trim();
+		
+		String timeLine = gitTime.split("\\+")[0].trim();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date commitTime = format.parse(timeLine);
+		return commitTime;
+	}
+	
 	public String getSrc(String proj, int id){
-		String allPath = "/home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/d4j-info/src_path/" + proj.toLowerCase() + "/" + id + ".txt" ;
+		String allPath = Configuration.HOME + "../d4j-info/src_path/" + proj.toLowerCase() + "/" + id + ".txt" ;
 		return FileHelper.readFile(allPath).split("\n")[0]; // srcPath
 	}
 	
 	public String getShellDiff(String proj, int id) throws IOException{
-		String repoBuggy = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
-		String repoFixed = "/home/dale/ALL_APR_TOOLS/d4j-repo/fixed_bugs_dir/";
+		String repoBuggy = Configuration.D4J_REPO;
+		String repoFixed = Configuration.D4J_REPO + "fixed_bugs_dir/";
 		String[] cmd = {"/bin/sh","-c", "cd " + repoBuggy 
 				+ " && " + "/bin/bash single-download.sh "
 				+ proj + " " + id + " 1"};
-//		shellRun2(cmd);
+		shellRun2(cmd);
 		
 		String[] cmd2 = {"/bin/sh","-c", "cd " + repoFixed 
 				+ " && " + "/bin/bash  fixed_single_download.sh "
 				+ proj + " " + id + " 1"};
-//		shellRun2(cmd2);
+		shellRun2(cmd2);
 		
 		String srcPath = getSrc(proj, id);
 		String buggySrcPath = repoBuggy + proj + "/" + proj + "_" + id + srcPath;
@@ -51,20 +68,20 @@ public class BugDiff {
 				+ buggySrcPath + " " + fixedrcPath
 				};
 		String shellDiff = shellRun2(cmd3);
+		System.out.println("shellDiff: \n" + shellDiff);
 		return shellDiff;
 	}
 	
 	public Map<Integer, List<String>> getChart() throws IOException{
 		String proj = "Chart";
 		Map<Integer, List<String>> diffMap = new HashMap<>();
-		for(int id = 1; id <= 1; id++){
+		for(int id = 1; id <= 10; id++){ //test : Chart 1, 14
 //			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);
 			String shellDiff = getShellDiff(proj, id);
 			
 			// save shell diff
-			String targetPath = "/home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/data/PatchCommits/Keywords/jfreechart/"
-					 + proj + "/" + id + "/diffInfo.txt";
+			String targetPath = Configuration.BUGS + proj + "/" + id + "/diffInfo.txt";
 			FileHelper.outputToFile(targetPath, shellDiff, false);
 			
 			String[] diffLines = shellDiff.split("\n");
@@ -107,7 +124,7 @@ public class BugDiff {
 			}
 			
 			diffMap.put(id, diffHunkList);
-			System.out.print("");
+//			System.out.print("");
 		}
 		return diffMap;
 	}
@@ -123,8 +140,7 @@ public class BugDiff {
 			fileName = "fixed-" + buggyFile.getName();
 		}
 		
-		String targetPath = "/home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/data/PatchCommits/Keywords/jfreechart/"
-				 + proj + "/" + id + "/" + fileName;
+		String targetPath = Configuration.BUGS + proj + "/" + id + "/" + fileName;
 		///home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/data/PatchCommits/Keywords/jfreechart/Chart/1/
 		FileHelper.outputToFile(targetPath, "", false);
 		String result = shellRun2("cp " + buggyPath + " " + targetPath);

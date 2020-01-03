@@ -42,6 +42,8 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.lu.uni.serval.Configuration;
+import edu.lu.uni.serval.BugCommit.BugDiff;
 import edu.lu.uni.serval.git.exception.GitRepositoryNotFoundException;
 import edu.lu.uni.serval.git.exception.NotValidGitRepositoryException;
 import edu.lu.uni.serval.git.filter.CommitFilter;
@@ -907,7 +909,7 @@ public class GitRepository {
 		log.info("All modified java files: " + a + "=========All Non-test java files:" + b + "==========Unchanged non-test java files: " + c);
 	}
 	
-	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, Map<Integer, List<String>> diffMap) throws MissingObjectException, IOException	{
+	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, Map<Integer, List<String>> diffMap, boolean outputFlag) throws MissingObjectException, IOException	{
 		String fileName = null;
 		String revisedFileContent = null;
 		String previousFileContent = null;
@@ -964,7 +966,9 @@ public class GitRepository {
 							diffentryStr.append(line).append("\n");
 						}
 					}
+//					if (outputFlag){
 					FileHelper.outputToFile(outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"), diffentryStr, false);
+//					}
 					b ++;
 					
 					String diffEntry = "" + diffentryStr;
@@ -983,8 +987,17 @@ public class GitRepository {
 						}
 						
 						// is this commit
-						if (isThisCommitFlag > 0){
-							System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, parentCommitId);
+						// TODO: may change to isThisCommitFlag == diffHunks.size()... Not sure.
+						if (isThisCommitFlag > 0){ // == diffHunks.size()){ // > 0){
+							System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, commitId);
+							String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + commitId;
+							String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
+									+ " && " + " git show -s --format=%ci " 
+									+ commitId
+									};
+							String commitTime = BugDiff.shellRun2(cmd3);
+							
+							FileHelper.outputToFile(targetPath, commitTime, true);
 						}else{
 //							System.out.println("-------");
 						}
