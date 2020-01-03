@@ -67,7 +67,7 @@ public class MultipleThreadsPatchesParser1 {
 				// find all ids
 				File[] idsDir = new File(projDir).listFiles();
 				for(File idDir : idsDir){
-					if(idDir.isDirectory()){
+					if(idDir.isDirectory() && idDir.getName() == Configuration.ID){ // fix this: only one at a time
 						String projIdDir = projDir + idDir.getName() + "/";
 						File revFilesPath = new File(projIdDir);
 						File[] revFiles = revFilesPath.listFiles();   // project folders
