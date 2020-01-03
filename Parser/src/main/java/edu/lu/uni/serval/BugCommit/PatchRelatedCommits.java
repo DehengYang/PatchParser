@@ -11,6 +11,7 @@ import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import edu.lu.uni.serval.Configuration;
+import edu.lu.uni.serval.BugCommit.parser.Pair;
 import edu.lu.uni.serval.git.exception.GitRepositoryNotFoundException;
 import edu.lu.uni.serval.git.exception.NotValidGitRepositoryException;
 import edu.lu.uni.serval.git.travel.CommitDiffEntry;
@@ -21,15 +22,12 @@ public class PatchRelatedCommits {
 	
 	public void collectCommits(String projectsPath, String outputPath, String urlPath) {
 		File[] projects = new File(projectsPath).listFiles();
-		FileHelper.deleteDirectory(outputPath);
-//		System.out.print(Configuration.HOME);
-//		Map<String, String> map = new HashMap<>();
-//		map.put("commons-io", "IO-");
-		// dale comment
-//		map.put("commons-lang", "LANG-");
-//		map.put("mahout", "MAHOUT-");
-//		map.put("commons-math", "MATH-");
-//		map.put("derby", "DERBY-");
+		
+		// dale
+		if(Configuration.DELETE_COMMITS){
+			FileHelper.deleteDirectory(outputPath);
+		}
+
 		for (File project : projects) {
 			if (!project.isDirectory()) continue;
 			String repoName = project.getName();
@@ -48,49 +46,20 @@ public class PatchRelatedCommits {
 				Configuration.PROJECT = project.getName();
 				BugDiff bugDiff = new BugDiff();
 				Map<Integer, List<String>>  diffMap = bugDiff.getChart();
+				Map<String,  List<Pair<String, String>>>  commitMap = new HashMap<>();
 				List<CommitDiffEntry> commitsDiffentries = gitRepo.getCommitDiffEntries(commits);
-				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "_allCommits/", commitsDiffentries, diffMap, false);
-				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_allCommits.txt", commits);
+				// TODO: only false in debugging mode.
+				boolean flagWriteAllCommitsDiff = false;
+				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "_allCommits/", commitsDiffentries, commitMap, flagWriteAllCommitsDiff);
+//				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_allCommits.txt", commits);
 				
+				matchCommitId(diffMap, commitMap);
 				
 				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
 				System.out.println("Keywords-matching Commits: " + keywordPatchCommits.size());
-				// dale comment here
-//				List<RevCommit> commits = gitRepo.getAllCommits(false);
-//				System.out.println("All Commits: " + commits.size());
-//				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
-//				System.out.println("Keywords Patch Commits: " + keywordPatchCommits.size());
-//				List<RevCommit> linkedPatchCommits;  // searched by bugId. "Bug"
-//				String bugId = map.get(repoName);
-				// dale comment
-//				if (bugId == null) {
-//					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, "LUCENE-", "SOLR-");
-//				} else {
-//					linkedPatchCommits = gitRepo.filterCommitsByBug(commits, urlPath, bugId);
-//				}
-//				System.out.println("Bug-report Linked Patch Commits: " + linkedPatchCommits.size());
-//				List<RevCommit> keyworkAndLinkedPatchCommits;
-//				if (bugId == null) {
-//					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, "LUCENE-", "SOLR-");
-//				} else {
-//					keyworkAndLinkedPatchCommits = gitRepo.filterCommitsByBug(keywordPatchCommits, urlPath, bugId);
-//				}
-				// dale comment 
-//				keywordPatchCommits.removeAll(keyworkAndLinkedPatchCommits);
-//				System.out.println("Keywords-matching and unlinked Patch Commits: " + keywordPatchCommits.size());
-//				System.out.println("All collected patch-related Commits: " + (linkedPatchCommits.size() + keywordPatchCommits.size()));
-				
-				// previous java file vs. modified java file
-//				System.out.println("Create revised Java files and previous Java files that contains code changes patch parsing with GumTree.");
-//				List<CommitDiffEntry> linkedPatchCommitDiffentries = gitRepo.getCommitDiffEntries(linkedPatchCommits);
-//				gitRepo.createFilesForGumTree(outputPath + "Linked/" + repoName + "/", linkedPatchCommitDiffentries);
-				
-				//dale: get all chart bugs diff info 
-//				BugDiff bugDiff = new BugDiff();
-//				Map<Integer, List<String>>  diffMap = bugDiff.getChart();
 				
 				List<CommitDiffEntry> unlinkedPatchCommitDiffentries = gitRepo.getCommitDiffEntries(keywordPatchCommits);
-				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "/", unlinkedPatchCommitDiffentries, diffMap, true);
+				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "/", unlinkedPatchCommitDiffentries, true);
 				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_Keywords.txt", keywordPatchCommits);
 //				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_Linked.txt", linkedPatchCommits);
 				
@@ -108,6 +77,52 @@ public class PatchRelatedCommits {
 				e.printStackTrace();
 			} finally {
 				gitRepo.close();
+			}
+		}
+	}
+
+	private void matchCommitId(Map<Integer, List<String>> diffMap, Map<String, List<Pair<String, String>>> commitMap) throws IOException {
+		for(Map.Entry<String, List<Pair<String,String>>> entry : commitMap.entrySet()){
+			String commitId = entry.getKey();
+			List<Pair<String,String>> diffEntryList =  entry.getValue();
+			
+			// read all diffs of a commit
+			String diffEntryContent = "";
+			for(Pair<String,String> diffEntry : diffEntryList){
+				File diffEntryFile = new File(diffEntry.getSecond()); 
+				if(diffEntryFile.exists()){// check if exist
+					diffEntryContent += FileHelper.readFile(diffEntryFile).replace("\n", "");
+				}
+			}
+			
+			// each bug diff
+			for(Map.Entry<Integer, List<String>> entryBug : diffMap.entrySet()){
+				int id = entryBug.getKey();
+				List<String> diffHunks = entryBug.getValue();
+				int isThisCommitFlag = 0;
+				
+				for (String diffHunk : diffHunks){
+					// when the diff hunk is "- }", may need to skip. i.e., do not add flag with 1
+					if (diffEntryContent.indexOf(diffHunk) == -1){
+						break; // not contain 
+					}else{
+						isThisCommitFlag++;
+					}
+				}
+				
+				// is this commit
+				// may change to isThisCommitFlag == diffHunks.size()... Not sure.
+				if (isThisCommitFlag == diffHunks.size()){ // > 0){
+//					System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, commitId);
+					String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + commitId;
+					String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
+							+ " && " + " git show -s --format=%ci " 
+							+ commitId
+							};
+					String commitTime = BugDiff.shellRun2(cmd3);
+					
+					FileHelper.outputToFile(targetPath, commitTime, true);
+				}
 			}
 		}
 	}

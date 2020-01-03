@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.lu.uni.serval.Configuration;
 import edu.lu.uni.serval.BugCommit.BugDiff;
+import edu.lu.uni.serval.BugCommit.parser.Pair;
 import edu.lu.uni.serval.git.exception.GitRepositoryNotFoundException;
 import edu.lu.uni.serval.git.exception.NotValidGitRepositoryException;
 import edu.lu.uni.serval.git.filter.CommitFilter;
@@ -909,7 +911,7 @@ public class GitRepository {
 		log.info("All modified java files: " + a + "=========All Non-test java files:" + b + "==========Unchanged non-test java files: " + c);
 	}
 	
-	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, Map<Integer, List<String>> diffMap, boolean outputFlag) throws MissingObjectException, IOException	{
+	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, boolean outputFlag) throws MissingObjectException, IOException	{
 		String fileName = null;
 		String revisedFileContent = null;
 		String previousFileContent = null;
@@ -970,41 +972,86 @@ public class GitRepository {
 					FileHelper.outputToFile(outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"), diffentryStr, false);
 //					}
 					b ++;
-					
-					String diffEntry = "" + diffentryStr;
-					diffEntry = diffEntry.replace("\n", "");
-					
-					for(Map.Entry<Integer, List<String>> entry : diffMap.entrySet()){
-						int id = entry.getKey();
-						List<String> diffHunks = entry.getValue();
-						int isThisCommitFlag = 0;
-						for (String diffHunk : diffHunks){
-							if (diffEntry.indexOf(diffHunk) == -1){
-								break; // not contain 
-							}else{
-								isThisCommitFlag++;
+				}
+			}
+		}
+//		log.info("All modified java files: " + a + "=========All Non-test java files:" + b + "==========Unchanged non-test java files: " + c);
+	}
+	
+	public void createFilesForGumTree(String outputPath, List<CommitDiffEntry> gtDiffentries, Map<String, List<Pair<String, String>>>  commitMap , boolean outputFlag) throws MissingObjectException, IOException	{
+		String fileName = null;
+		String revisedFileContent = null;
+		String previousFileContent = null;
+		File revisedFile = null;
+		File previousFile = null;
+
+		int a = 0;
+		int b = 0;
+		int c = 0;
+		for (CommitDiffEntry gtDiffentry : gtDiffentries) {
+			DiffEntry diffentry = gtDiffentry.getDiffentry();
+			if (DiffEntryFilter.filterJavaFile(diffentry) && DiffEntryFilter.filterModifyType(diffentry)) {
+				a ++;
+				RevCommit commit = gtDiffentry.getCommit();
+				RevCommit parentCommit = gtDiffentry.getParentCommit();
+				if (commit.getParentCount() > 1) {
+					continue;
+				}
+				String commitId = commit.getId().name().substring(0, 6);
+				fileName = diffentry.getNewPath().replaceAll("/", "#");
+				if (fileName.toLowerCase(Locale.ENGLISH).contains("test")) {
+					continue;
+				}
+				String parentCommitId = parentCommit.getId().name().substring(0, 6);
+				
+				fileName = createFileName(fileName, commitId, parentCommitId);
+				
+				revisedFileContent = getFileContent(commit, diffentry.getNewPath());
+				revisedFile = new File(outputPath + "revFiles/" + fileName);
+				previousFileContent = getFileContent(parentCommit, diffentry.getOldPath());
+				previousFile = new File(outputPath + "prevFiles/prev_" + fileName);
+				
+				//dale
+				Pair<String, String> files = new Pair<String, String>(outputPath + "revFiles/" + fileName, outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"));
+				if(commitMap.containsKey(commitId)){
+					List<Pair<String, String>> commitFiles = commitMap.get(commitId);
+					commitFiles.add(files);
+				}else{
+//					commitMap.put(commitId, Arrays.asList(files));//this is a bug causing java.lang.UnsupportedOperationException when adding new elements
+					List<Pair<String, String>> filesList = new ArrayList<>() ;
+					filesList.add(files);
+					commitMap.put(commitId, filesList);
+				}
+				
+				if (revisedFileContent.equals(previousFileContent)) {
+	        		c ++;
+//	        		System.out.println(commitId + "===" + revisedFile.getName());
+//	        		System.out.println(commit.getParents()[0].getId().name().substring(0, 6) + "===" + previousFile.getName());
+//	        		System.out.println("=======");
+	        	}
+				if (revisedFileContent != null && previousFileContent != null && !"".equals(revisedFileContent) && !"".equals(previousFileContent)) {
+					FileHelper.createFile(revisedFile, revisedFileContent);
+					FileHelper.createFile(previousFile, previousFileContent);
+					// output DiffEntries
+					BufferedReader reader = getDiffEntryChangedDetails(diffentry);
+					String line = null;
+					StringBuilder diffentryStr = new StringBuilder();
+					diffentryStr.append(parentCommit.getId().name().substring(0, 6)).append("\n");
+					boolean isDiff = false;
+					while ((line = reader.readLine()) != null) {
+						if (!isDiff) {
+							if (LineDiffFilter.filterSignal(line)) {
+								isDiff = true;
+								diffentryStr.append(line).append("\n");
 							}
+						} else {
+							diffentryStr.append(line).append("\n");
 						}
-						
-						// is this commit
-						// TODO: may change to isThisCommitFlag == diffHunks.size()... Not sure.
-						if (isThisCommitFlag > 0){ // == diffHunks.size()){ // > 0){
-							System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, commitId);
-							String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + commitId;
-							String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
-									+ " && " + " git show -s --format=%ci " 
-									+ commitId
-									};
-							String commitTime = BugDiff.shellRun2(cmd3);
-							
-							FileHelper.outputToFile(targetPath, commitTime, true);
-						}else{
-//							System.out.println("-------");
-						}
-						
 					}
-					
-					
+					if (outputFlag){
+						FileHelper.outputToFile(outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"), diffentryStr, false);
+					}
+					b ++;
 				}
 			}
 		}

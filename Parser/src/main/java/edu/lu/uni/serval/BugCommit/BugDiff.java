@@ -68,14 +68,14 @@ public class BugDiff {
 				+ buggySrcPath + " " + fixedrcPath
 				};
 		String shellDiff = shellRun2(cmd3);
-		System.out.println("shellDiff: \n" + shellDiff);
+//		System.out.println("shellDiff: \n" + shellDiff);
 		return shellDiff;
 	}
 	
 	public Map<Integer, List<String>> getChart() throws IOException{
 		String proj = "Chart";
 		Map<Integer, List<String>> diffMap = new HashMap<>();
-		for(int id = 1; id <= 10; id++){ //test : Chart 1, 14
+		for(int id = 11; id <= 26; id++){ //test : Chart 1, 14
 //			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);
 			String shellDiff = getShellDiff(proj, id);

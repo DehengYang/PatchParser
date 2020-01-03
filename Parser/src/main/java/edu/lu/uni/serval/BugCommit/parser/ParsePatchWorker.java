@@ -105,7 +105,7 @@ public class ParsePatchWorker extends UntypedActor {
 					}
 					
 					if(timeList.size() > 1){
-						FileHelper.outputToFile(commitTimePath + "timeError", "", false);
+						FileHelper.outputToFile(commitTimePath + "timeError" + file.getName(), "", false);
 					}
 				}
 			}
@@ -204,7 +204,7 @@ public class ParsePatchWorker extends UntypedActor {
 				String CCI = CCIList.get(cnt);
 				if(opCntMap.keySet().contains(CCI)){
 					System.out.println("No." + cnt + " CCI matched.");
-					matchCCI += "No." + cnt + " CCI matched.\n" ;
+					matchCCI += "\nNo." + cnt + " CCI matched.\n" ;
 					
 					int freq = opCntMap.get(CCI).getFirst();
 					String ids = "";
@@ -552,7 +552,7 @@ public class ParsePatchWorker extends UntypedActor {
 	private int expId = 0;
 	private List<String> expDepthList = new ArrayList<>();
 	// added by dale
-	private int exp_cnt = 0;
+//	private int exp_cnt = 0;
 	StringBuilder stmtTypeChangeExamples = new StringBuilder();
 	boolean outputTypeChangeExp = false;
 	boolean outputAddModifierExp = false;

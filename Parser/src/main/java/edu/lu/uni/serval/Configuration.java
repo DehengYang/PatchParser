@@ -17,10 +17,13 @@ public class Configuration {
 	// /home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/Parser
 	public static final String HOME = System.getProperty("user.dir") + "/";
 	public static final String BUGS = OUTPUT_PATH + "bugs/";
-	public static final String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
+	
+	// dale : parameters.
+	public static String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
 	public static String PROJ_BUG = "Chart";
 	public static String PROJECT = "jfreechart";
-	public static String ID = "14";
+	public static String ID = "1";
+	public static boolean DELETE_COMMITS = false;
 
 	public static Map<String, Integer> numOfWorkers = new HashMap<>();
 	public static Map<String, Integer> sizeThreshold = new HashMap<>();

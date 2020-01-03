@@ -38,7 +38,7 @@ public class Main {
 //		}
 		
 		//dale
-		FileHelper.deleteDirectory(Configuration.BUGS);
+//		FileHelper.deleteDirectory(Configuration.BUGS);
 		System.out.println("\n\n\n======================================================================================");
 		System.out.println("Collect bug-fix-related commits with bugID of bug reports and bug-related keywords,\n"
 				+ "and Fileter out test Java code changes.");
