@@ -12,21 +12,30 @@ import org.apache.commons.cli.Options;
 
 import edu.lu.uni.serval.BugCommit.Distribution;
 import edu.lu.uni.serval.BugCommit.parser.MultipleThreadsPatchesParser1;
+import edu.lu.uni.serval.utils.FileHelper;
 
 public class Main2 {
 
 	public static void main(String[] args) throws IOException, ParseException  {
 		// dale
 		setParameters(args);
+		Configuration.commitNoMap.clear();
+		Configuration.commitExecutedNoMap.clear();
 		
-		System.out.println("\n\n\n======================================================================================");
-		System.out.println("Statistics of diff hunk sizes of code changes.");
-		System.out.println("======================================================================================");
+		// delete first
+		Configuration.CIIPath = Configuration.PARSE_RESULTS_PATH + "CII/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
+		Configuration.CIIPurePath = Configuration.PARSE_RESULTS_PATH + "CII-pure/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
+		FileHelper.deleteDirectory(Configuration.CIIPath);
+		FileHelper.deleteDirectory(Configuration.CIIPurePath);
+		
+//		System.out.println("\n\n\n======================================================================================");
+//		System.out.println("Statistics of diff hunk sizes of code changes.");
+//		System.out.println("======================================================================================");
 		new Distribution().statistics(Configuration.PATCH_COMMITS_PATH, Configuration.DIFFENTRY_SIZE_PATH);
 		
-		System.out.println("\n\n\n======================================================================================");
-		System.out.println("Parse code changes of patches.");
-		System.out.println("======================================================================================");
+//		System.out.println("\n\n\n======================================================================================");
+//		System.out.println("Parse code changes of patches.");
+//		System.out.println("======================================================================================");
 		new MultipleThreadsPatchesParser1().parse(Configuration.PATCH_COMMITS_PATH, Configuration.PARSE_RESULTS_PATH);
 //		new MultipleThreadsPatchesParser2().parse(Configuration.PATCH_COMMITS_PATH, Configuration.PARSE_RESULTS_PATH);
 	}
@@ -75,5 +84,9 @@ public class Main2 {
         if(cli.hasOption("id")){
         	Configuration.ID = cli.getOptionValue("id");
         }
+        
+        System.out.format("Proj: %s, ID: %s", Configuration.PROJ_BUG, Configuration.ID);
+        
+        // set project dir
     }
 }

@@ -24,12 +24,12 @@ public class PatchRelatedCommits {
 		File[] projects = new File(projectsPath).listFiles();
 		
 		// dale
-		if(Configuration.DELETE_COMMITS){
+		if(Configuration.DELETE_PatchCommitsDir){
 			FileHelper.deleteDirectory(outputPath);
 		}
 
 		for (File project : projects) {
-			if (!project.isDirectory()) continue;
+			if (!project.isDirectory()  || ! project.getName().equals(Configuration.PROJECT)) continue;
 			String repoName = project.getName();
 			String revisedFilesPath = "";
 			String previousFilesPath = "";
@@ -49,11 +49,10 @@ public class PatchRelatedCommits {
 				Map<String,  List<Pair<String, String>>>  commitMap = new HashMap<>();
 				List<CommitDiffEntry> commitsDiffentries = gitRepo.getCommitDiffEntries(commits);
 				// TODO: only false in debugging mode.
-				boolean flagWriteAllCommitsDiff = false;
-				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "_allCommits/", commitsDiffentries, commitMap, flagWriteAllCommitsDiff);
+				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "_allCommits/", commitsDiffentries, commitMap, Configuration.PRINT_ALLCOMMIT);
 //				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_allCommits.txt", commits);
 				
-				matchCommitId(diffMap, commitMap);
+				matchCommitId2();
 				
 				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
 				System.out.println("Keywords-matching Commits: " + keywordPatchCommits.size());
@@ -81,6 +80,7 @@ public class PatchRelatedCommits {
 		}
 	}
 
+	// only for chart
 	private void matchCommitId(Map<Integer, List<String>> diffMap, Map<String, List<Pair<String, String>>> commitMap) throws IOException {
 		for(Map.Entry<String, List<Pair<String,String>>> entry : commitMap.entrySet()){
 			String commitId = entry.getKey();
@@ -124,6 +124,29 @@ public class PatchRelatedCommits {
 					FileHelper.outputToFile(targetPath, commitTime, true);
 				}
 			}
+		}
+	}
+	
+	// for closure 
+	private void matchCommitId2() throws IOException {
+		String[] commitContent = FileHelper.readFile(Configuration.commitDB + Configuration.PROJ_BUG + "/commit-db").split("\n");
+		Map<Integer, String> idCommitMap = new HashMap<>();
+		
+		for(String commitLine : commitContent){
+			int id = Integer.parseInt(commitLine.split(",")[0]);
+			String commitId = commitLine.split(",")[2].trim().substring(0, Configuration.commitIdLength);
+			idCommitMap.put(id, commitId);
+		}
+		
+		for(int id = 1; id <= Configuration.numOfBugs.get(Configuration.PROJECT); id++){
+			String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + idCommitMap.get(id);
+			String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
+					+ " && " + " git show -s --format=%ci " 
+					+ idCommitMap.get(id)
+					};
+			String commitTime = BugDiff.shellRun2(cmd3);
+			
+			FileHelper.outputToFile(targetPath, commitTime, true);
 		}
 	}
 

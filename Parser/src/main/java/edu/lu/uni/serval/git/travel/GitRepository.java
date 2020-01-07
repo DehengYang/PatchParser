@@ -318,7 +318,7 @@ public class GitRepository {
 		String shortMessage = commit.getShortMessage(); 
 		String fullMessage = commit.getFullMessage();
 		if (shortMessage.contains(bugId) || fullMessage.contains(bugId)) {
-			String commitId = commit.getId().name().substring(0, 6);
+			String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 			return connectedBugReport(shortMessage, fullMessage, bugId, bugReportFile, commitId);
 		}
 		return false;
@@ -408,7 +408,7 @@ public class GitRepository {
 	private boolean isBugReported(RevCommit commit, String bugId1, String bugId2, String bugReportFile) {
 		String shortMessage = commit.getShortMessage(); 
 		String fullMessage = commit.getFullMessage();
-		String commitId = commit.getId().name().substring(0, 6);
+		String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 		if (shortMessage.contains(bugId1) || fullMessage.contains(bugId1)) {
 			return connectedBugReport(shortMessage, fullMessage, bugId1, bugReportFile, commitId);
 		} else if (shortMessage.contains(bugId2) || fullMessage.contains(bugId2)) {
@@ -622,8 +622,8 @@ public class GitRepository {
 							// filter testing java file
 							break;
 						}
-						commitId = commitDiffentry.getCommit().getId().name().substring(0, 6);
-						String parentCommitId = commitDiffentry.getParentCommit().getId().name().substring(0, 6);
+						commitId = commitDiffentry.getCommit().getId().name().substring(0, Configuration.commitIdLength);
+						String parentCommitId = commitDiffentry.getParentCommit().getId().name().substring(0, Configuration.commitIdLength);
 						String fileName = diffentry.getNewPath().replaceAll("/", "#");
 						fileName = createFileName(fileName, commitId, parentCommitId);
 						revFile = fileName;
@@ -676,7 +676,7 @@ public class GitRepository {
 					myDiffentry.setPrevFile(prevFile);
 					myDiffentry.setModifiedDetails(mdList);
 					myDiffentry.setCommitId(commitId);
-					myDiffentry.setPrevCommitId(commitDiffentry.getParentCommit().getParents()[0].getId().name().substring(0, 6));
+					myDiffentry.setPrevCommitId(commitDiffentry.getParentCommit().getParents()[0].getId().name().substring(0, Configuration.commitIdLength));
 					myDiffEntries.add(myDiffentry);
 				}
 			}//end of if
@@ -751,14 +751,14 @@ public class GitRepository {
 							// filter testing java file
 							break;
 						}
-						commitId = commitDiffentry.getCommit().getId().name().substring(0, 6);
-						String parentCommitId = commitDiffentry.getParentCommit().getId().name().substring(0, 6);
+						commitId = commitDiffentry.getCommit().getId().name().substring(0, Configuration.commitIdLength);
+						String parentCommitId = commitDiffentry.getParentCommit().getId().name().substring(0, Configuration.commitIdLength);
 						String fileName = diffentry.getNewPath().replaceAll("/", "#");
 						fileName = createFileName(fileName, commitId, parentCommitId);
 						revFile = fileName;
 						prevFile = "prev_" + fileName;
 //						String prevFileName = diffentry.getOldPath().replace("/", "#");
-//						prevFile = "prev_" + commitDiffentry.getCommit().getParents()[0].getId().name().substring(0, 6) + prevFileName;
+//						prevFile = "prev_" + commitDiffentry.getCommit().getParents()[0].getId().name().substring(0, Configuration.commitIdLength) + prevFileName;
 						continue;
 					}
 					
@@ -865,12 +865,12 @@ public class GitRepository {
 				if (commit.getParentCount() > 1) {
 					continue;
 				}
-				String commitId = commit.getId().name().substring(0, 6);
+				String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 				fileName = diffentry.getNewPath().replaceAll("/", "#");
 				if (fileName.toLowerCase(Locale.ENGLISH).contains("test")) {
 					continue;
 				}
-				String parentCommitId = parentCommit.getId().name().substring(0, 6);
+				String parentCommitId = parentCommit.getId().name().substring(0, Configuration.commitIdLength);
 				
 				fileName = createFileName(fileName, commitId, parentCommitId);
 				
@@ -891,7 +891,7 @@ public class GitRepository {
 					BufferedReader reader = getDiffEntryChangedDetails(diffentry);
 					String line = null;
 					StringBuilder diffentryStr = new StringBuilder();
-					diffentryStr.append(parentCommit.getId().name().substring(0, 6)).append("\n");
+					diffentryStr.append(parentCommit.getId().name().substring(0, Configuration.commitIdLength)).append("\n");
 					boolean isDiff = false;
 					while ((line = reader.readLine()) != null) {
 						if (!isDiff) {
@@ -930,12 +930,12 @@ public class GitRepository {
 				if (commit.getParentCount() > 1) {
 					continue;
 				}
-				String commitId = commit.getId().name().substring(0, 6);
+				String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 				fileName = diffentry.getNewPath().replaceAll("/", "#");
 				if (fileName.toLowerCase(Locale.ENGLISH).contains("test")) {
 					continue;
 				}
-				String parentCommitId = parentCommit.getId().name().substring(0, 6);
+				String parentCommitId = parentCommit.getId().name().substring(0, Configuration.commitIdLength);
 				
 				fileName = createFileName(fileName, commitId, parentCommitId);
 				
@@ -956,7 +956,7 @@ public class GitRepository {
 					BufferedReader reader = getDiffEntryChangedDetails(diffentry);
 					String line = null;
 					StringBuilder diffentryStr = new StringBuilder();
-					diffentryStr.append(parentCommit.getId().name().substring(0, 6)).append("\n");
+					diffentryStr.append(parentCommit.getId().name().substring(0, Configuration.commitIdLength)).append("\n");
 					boolean isDiff = false;
 					while ((line = reader.readLine()) != null) {
 						if (!isDiff) {
@@ -997,12 +997,12 @@ public class GitRepository {
 				if (commit.getParentCount() > 1) {
 					continue;
 				}
-				String commitId = commit.getId().name().substring(0, 6);
+				String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 				fileName = diffentry.getNewPath().replaceAll("/", "#");
 				if (fileName.toLowerCase(Locale.ENGLISH).contains("test")) {
 					continue;
 				}
-				String parentCommitId = parentCommit.getId().name().substring(0, 6);
+				String parentCommitId = parentCommit.getId().name().substring(0, Configuration.commitIdLength);
 				
 				fileName = createFileName(fileName, commitId, parentCommitId);
 				
@@ -1036,7 +1036,7 @@ public class GitRepository {
 					BufferedReader reader = getDiffEntryChangedDetails(diffentry);
 					String line = null;
 					StringBuilder diffentryStr = new StringBuilder();
-					diffentryStr.append(parentCommit.getId().name().substring(0, 6)).append("\n");
+					diffentryStr.append(parentCommit.getId().name().substring(0, Configuration.commitIdLength)).append("\n");
 					boolean isDiff = false;
 					while ((line = reader.readLine()) != null) {
 						if (!isDiff) {
@@ -1084,7 +1084,7 @@ public class GitRepository {
 			for (CommitDiffEntry cDiffentry : diffEntries) {
 				DiffEntry diffentry = cDiffentry.getDiffentry();
 				if (DiffEntryFilter.filterJavaFile(diffentry) && !DiffEntryFilter.filterDeleteType(diffentry)) {
-					String commitId = commit.getId().name().substring(0, 6);
+					String commitId = commit.getId().name().substring(0, Configuration.commitIdLength);
 					String fileName = diffentry.getNewPath().replaceAll("/", "#");
 					if (fileName.toLowerCase().contains("test")) {
 						continue;

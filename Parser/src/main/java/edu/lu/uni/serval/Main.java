@@ -4,6 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
 import edu.lu.uni.serval.BugCommit.Distribution;
 import edu.lu.uni.serval.BugCommit.DownloadBugReports;
 import edu.lu.uni.serval.BugCommit.PatchRelatedCommits;
@@ -13,29 +20,13 @@ import edu.lu.uni.serval.utils.FileHelper;
 public class Main {
 
 	public static void main(String[] args) throws IOException {
+		// dale
+		setParameters(args);
+				
 		System.out.println("======================================================================================");
 		System.out.println("Statistics of project LOC.");
 		System.out.println("======================================================================================");
 		new Distribution().countLOC(Configuration.SUBJECTS_PATH);
-		
-		// dale comment
-//		System.out.println("\n\n\n======================================================================================");
-//		System.out.println("Download fixed bug reports from JIRA.");
-//		System.out.println("======================================================================================");
-//		if (! new File(Configuration.BUG_REPORTS_PATH).exists()) {
-//			DownloadBugReports dlbr = new DownloadBugReports();
-//			dlbr.collectBugReports("IO-", Configuration.BUG_REPORT_URL, 1, 573);
-//			dlbr.collectBugReports("LANG-", Configuration.BUG_REPORT_URL, 1, 1386);
-//			dlbr.collectBugReports("MATH-", Configuration.BUG_REPORT_URL, 1, 1453);
-//			dlbr.collectBugReports("MAHOUT-", Configuration.BUG_REPORT_URL, 1, 2030);
-//			dlbr.collectBugReports("DERBY-", Configuration.BUG_REPORT_URL, 1, 6985);
-//			dlbr.collectBugReports("LUCENE-", Configuration.BUG_REPORT_URL, 1, 8202);
-//			dlbr.collectBugReports("SOLR-", Configuration.BUG_REPORT_URL, 1, 12036);
-//			List<File> bugReportFiles = FileHelper.getAllFiles(Configuration.BUG_REPORTS_PATH, ".txt");
-//			for (File bugReportFile : bugReportFiles) {
-//				dlbr.parseBugReport(bugReportFile);
-//			}
-//		}
 		
 		//dale
 //		FileHelper.deleteDirectory(Configuration.BUGS);
@@ -46,12 +37,61 @@ public class Main {
 		PatchRelatedCommits prc = new PatchRelatedCommits();
 		prc.collectCommits(Configuration.SUBJECTS_PATH, Configuration.PATCH_COMMITS_PATH, Configuration.BUG_REPORTS_PATH);
 		
-		
 		System.out.println("\n\n\n======================================================================================");
 		System.out.println("Filter out non-Java code changes (e.g., Javadoc).");
 		System.out.println("======================================================================================");
 		new MultipleThreadsPatchCommitsFilter().filter(Configuration.SUBJECTS_PATH, Configuration.PATCH_COMMITS_PATH);
 		
 	}
+	
+	private static void setParameters(String[] args) {
+//		public static String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
+//		public static String PROJ_BUG = "Chart";
+//		public static String PROJECT = "jfreechart";
+//		public static String ID = "2";
+//		public static boolean DELETE_COMMITS = false;
+        Option opt1 = new Option("d4j","D4J_REPO",true,"e.g., /home/dale/ALL_APR_TOOLS/d4j-repo/");
+        opt1.setRequired(false);
+        Option opt2 = new Option("bugProj","PROJ_BUG",true,"e.g., Chart");
+        opt2.setRequired(false);   
+        Option opt3 = new Option("oriProj","PROJECT",true,"e.g., jfreechart");
+        opt3.setRequired(false);
+        Option opt4 = new Option("id","ID",true,"e.g., 2");
+        opt4.setRequired(false);
+
+        Options options = new Options();
+        options.addOption(opt1);
+        options.addOption(opt2);
+        options.addOption(opt3);
+        options.addOption(opt4);
+
+        CommandLine cli = null;
+        CommandLineParser cliParser = new DefaultParser();
+        HelpFormatter helpFormatter = new HelpFormatter();
+
+        try {
+            cli = cliParser.parse(options, args);
+        } catch (org.apache.commons.cli.ParseException e) {
+            helpFormatter.printHelp(">>>>>> test cli options", options);
+            e.printStackTrace();
+        } 
+
+        if (cli.hasOption("d4j")){
+        	Configuration.D4J_REPO = cli.getOptionValue("d4j");
+        }
+        if(cli.hasOption("bugProj")){
+        	Configuration.PROJ_BUG = cli.getOptionValue("bugProj");
+        }
+        if(cli.hasOption("oriProj")){
+        	Configuration.PROJECT = cli.getOptionValue("oriProj");
+        }
+        if(cli.hasOption("id")){
+        	Configuration.ID = cli.getOptionValue("id");
+        }
+        
+        System.out.format("oriProj: %s, bugProj: %s", Configuration.PROJECT, Configuration.PROJ_BUG);
+        
+        // set project dir
+    }
 
 }

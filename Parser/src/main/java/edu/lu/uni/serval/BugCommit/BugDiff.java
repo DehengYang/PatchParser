@@ -37,6 +37,10 @@ public class BugDiff {
 		
 		String timeLine = gitTime.split("\\+")[0].trim();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		//debug
+//		System.out.format("commitId: %s, timeLine: %s\n", commitId, timeLine);
+		
 		Date commitTime = format.parse(timeLine);
 		return commitTime;
 	}
@@ -52,12 +56,12 @@ public class BugDiff {
 		String[] cmd = {"/bin/sh","-c", "cd " + repoBuggy 
 				+ " && " + "/bin/bash single-download.sh "
 				+ proj + " " + id + " 1"};
-		shellRun2(cmd);
+//		shellRun2(cmd);
 		
 		String[] cmd2 = {"/bin/sh","-c", "cd " + repoFixed 
 				+ " && " + "/bin/bash  fixed_single_download.sh "
 				+ proj + " " + id + " 1"};
-		shellRun2(cmd2);
+//		shellRun2(cmd2);
 		
 		String srcPath = getSrc(proj, id);
 		String buggySrcPath = repoBuggy + proj + "/" + proj + "_" + id + srcPath;
@@ -73,9 +77,9 @@ public class BugDiff {
 	}
 	
 	public Map<Integer, List<String>> getChart() throws IOException{
-		String proj = "Chart";
+		String proj = Configuration.PROJ_BUG;
 		Map<Integer, List<String>> diffMap = new HashMap<>();
-		for(int id = 11; id <= 26; id++){ //test : Chart 1, 14
+		for(int id = 1; id <= Configuration.numOfBugs.get(Configuration.PROJECT); id++){ //test : Chart 1, 14   // Configuration.numOfBugs.get(Configuration.PROJ_BUG)
 //			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);
 			String shellDiff = getShellDiff(proj, id);

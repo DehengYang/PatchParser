@@ -102,13 +102,13 @@ public class Distribution {
 		int maxSize = sizes.get(size - 1);
 		upperWhisker = upperWhisker > maxSize ? maxSize : upperWhisker;
 		
-		System.out.println("Summary " + type + " sizes:");
-		System.out.println("Min: " + sizes.get(0));
-		System.out.println("First quartile: " + firstQuarter);
-		System.out.println("Mean: " + mean(sizes));
-		System.out.println("Third quartile: " + thirdQuarter);
-		System.out.println("Upper whisker: " + upperWhisker);
-		System.out.println("Max: " + maxSize);
+//		System.out.println("Summary " + type + " sizes:");
+//		System.out.println("Min: " + sizes.get(0));
+//		System.out.println("First quartile: " + firstQuarter);
+//		System.out.println("Mean: " + mean(sizes));
+//		System.out.println("Third quartile: " + thirdQuarter);
+//		System.out.println("Upper whisker: " + upperWhisker);
+//		System.out.println("Max: " + maxSize);
 		Configuration.sizeThreshold.put(type, upperWhisker);
 	}
 

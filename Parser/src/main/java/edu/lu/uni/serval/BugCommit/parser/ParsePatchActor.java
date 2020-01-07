@@ -15,6 +15,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
+import edu.lu.uni.serval.Configuration;
 import edu.lu.uni.serval.utils.FileHelper;
 import edu.lu.uni.serval.utils.ListSorter;
 
@@ -146,7 +147,7 @@ public class ParsePatchActor extends UntypedActor {
 		List<File> files = FileHelper.getAllFiles(directory, ".txt");
 		for (File file : files) {
 			String fileName = file.getName();
-			String commitId = fileName.substring(0, 6);
+			String commitId = fileName.substring(0, Configuration.commitIdLength);
 			if (!commitIds.contains(commitId)) commitIds.add(commitId);
 		}
 		return commitIds;

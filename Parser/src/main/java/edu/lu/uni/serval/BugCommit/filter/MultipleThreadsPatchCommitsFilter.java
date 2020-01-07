@@ -24,18 +24,18 @@ public class MultipleThreadsPatchCommitsFilter {
 	public void filter(String subjectsPath, String outputPath) {
 		File[] projects = new File(subjectsPath).listFiles();
 		for (File project : projects) {
-			if (project.isDirectory()) {
+			if (project.isDirectory()  && project.getName().equals(Configuration.PROJECT)) {  // fix here
 				String projectName = project.getName();
 				final List<MessageFile> msgFiles = readMessageFiles(projectName, outputPath);
 				ActorSystem system = null;
 				ActorRef parsingActor = null;
 				// dale
-				int numberOfWorkers;
-				if( ! Configuration.numOfWorkers.keySet().contains(projectName)){
-					numberOfWorkers = 1;
-				}else{
-					numberOfWorkers = Configuration.numOfWorkers.get(projectName);
-				}
+				int numberOfWorkers = 50; //dale try to use 100
+//				if( ! Configuration.numOfWorkers.keySet().contains(projectName)){
+//					numberOfWorkers = 1;
+//				}else{
+//					numberOfWorkers = Configuration.numOfWorkers.get(projectName);
+//				}
 				
 				final WorkMessage msg = new WorkMessage(0, msgFiles);
 				try {
@@ -80,7 +80,7 @@ public class MultipleThreadsPatchCommitsFilter {
 				MessageFile msgFile = new MessageFile(revFile, prevFile, diffentryFile);
 				msgFiles.add(msgFile);
 				
-				String commitId = fileName.substring(0, 6);
+				String commitId = fileName.substring(0, Configuration.commitIdLength);
 				if (!commitIds.contains(commitId)) commitIds.add(commitId);
 			}
 		}

@@ -67,7 +67,7 @@ public class MultipleThreadsPatchesParser1 {
 				// find all ids
 				File[] idsDir = new File(projDir).listFiles();
 				for(File idDir : idsDir){
-					if(idDir.isDirectory() && idDir.getName() == Configuration.ID){ // fix this: only one at a time
+					if(idDir.isDirectory() && idDir.getName().equals(Configuration.ID)){ // fix this: only one at a time
 						String projIdDir = projDir + idDir.getName() + "/";
 						File revFilesPath = new File(projIdDir);
 						File[] revFiles = revFilesPath.listFiles();   // project folders
@@ -109,9 +109,17 @@ public class MultipleThreadsPatchesParser1 {
 						MessageFile msgFile = new MessageFile(revFile, prevFile, diffentryFile);
 						
 						//dale
-						String commitId = revFile.getName().substring(0, 6);
+						String commitId = revFile.getName().substring(0, Configuration.commitIdLength);
 						Date commitTime = BugDiff.getCommitTime(commitId);
 						msgFile.setCommitTime(commitTime);
+						
+						if(Configuration.commitNoMap.containsKey(commitId)){
+							int number = Configuration.commitNoMap.get(commitId);
+							Configuration.commitNoMap.put(commitId, number + 1);
+						}else{
+							Configuration.commitNoMap.put(commitId, 1);
+//							Configuration.commitExecutedNoMap.put(commitId, 0);
+						}
 						
 						msgFiles.add(msgFile);
 					}
