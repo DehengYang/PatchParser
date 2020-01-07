@@ -3,6 +3,8 @@ package edu.lu.uni.serval.BugCommit.parser;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +22,6 @@ import edu.lu.uni.serval.utils.FileHelper;
 import edu.lu.uni.serval.utils.ListSorter;
 
 public class ParsePatchActor extends UntypedActor {
-	
 	private static Logger logger = LoggerFactory.getLogger(ParsePatchActor.class);
 
 	private ActorRef mineRouter;
@@ -113,6 +114,9 @@ public class ParsePatchActor extends UntypedActor {
 			
 //			logger.info(counter + " workers finished their work...");
 			if (counter >= numberOfWorkers) {
+				
+				getMatch();
+				
 				// dale comment
 				// here is a NPE. I comment it for future solution.
 				// TODO
@@ -129,6 +133,68 @@ public class ParsePatchActor extends UntypedActor {
 		} else {
 			unhandled(msg);
 		}
+	}
+
+	private void getMatch() {
+		// save to file : opCntMap
+		String FPPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" 
+				+ Configuration.ID + "/FixPatternFreqs.txt";
+		FileHelper.outputToFile(FPPath, "", false);
+		
+		// sort based on cnt, i.e., frequency
+		List<Map.Entry<String, Pair<Integer, List<String>>>> opCntList = new ArrayList<Map.Entry<String, Pair<Integer, List<String>>>>(this.opCntMap.entrySet());
+		Collections.sort(opCntList, new Comparator<Map.Entry<String, Pair<Integer, List<String>>>>() {
+			public int compare(Map.Entry<String, Pair<Integer, List<String>>> o1,
+					Map.Entry<String, Pair<Integer, List<String>>> o2) {
+				return (o2.getValue().getFirst()).compareTo(o1.getValue().getFirst());
+			} // in descending order. 
+		});
+ 
+		//for freq-rank
+		List<Integer> freqRankList = new ArrayList<>();
+		for (int i = 0; i < opCntList.size(); i++) {
+			String opStr = opCntList.get(i).getKey();
+							
+			int cnt = opCntList.get(i).getValue().getFirst();
+			
+			String ids = "";
+			for(String id : opCntList.get(i).getValue().getSecond()){
+				ids += id + " ";
+			}
+			
+			// record all freq rank
+			if(! freqRankList.contains(cnt)){
+				freqRankList.add(cnt);
+			}
+			
+			FileHelper.outputToFile(FPPath, "Freq: " + cnt + "\nCommitIds: " + ids + "\n", true);
+//			if(cnt >= 2){
+//				System.out.println(cnt); //print
+//			}
+			FileHelper.outputToFile(FPPath, opStr + "\n", true);
+		}
+		
+		// match CCI
+		String matchCCI = "";
+		for (int cnt = 0; cnt < this.CCIList.size(); cnt++){
+			String CCI = this.CCIList.get(cnt);
+			if(this.opCntMap.keySet().contains(CCI)){
+				System.out.println("No." + cnt + " CCI matched.");
+				matchCCI += "No." + cnt + " CCI matched.\n" ;
+				
+				int freq = this.opCntMap.get(CCI).getFirst();
+				String ids = "";
+				for(String id : this.opCntMap.get(CCI).getSecond()){
+					ids += id + " ";
+				}
+				matchCCI += "freq: " + freq + "\nCommitIds: " + ids +"\n";
+				
+				matchCCI += "FreqRank:" + (freqRankList.indexOf(freq) + 1) + "\n\n";
+			}
+		}
+		FileHelper.outputToFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID + "/matchResult.txt", matchCCI, false);
+
+		
 	}
 
 	private void readSelectedCommits() {
@@ -162,8 +228,14 @@ public class ParsePatchActor extends UntypedActor {
 	private List<String> patchCommitIds = new ArrayList<>();
 	private List<String> linkedPatchCommitIds;
 	private List<String> unlinkedPatchCommitIds;
+
+	private List<String> CCIList = new ArrayList<>();
+	private final Map<String, Pair<Integer, List<String>>> opCntMap = new HashMap<>();
 	
 	private void mergeData(WorkerReturnMessage workerMsg) {
+		mergeData1(this.opCntMap, workerMsg.opCntMap);
+		mergeData(this.CCIList, workerMsg.CCIList); //dale 
+		
 		mergeData(this.stmtMaps, workerMsg.getStmtMaps());
 		mergeData(this.elementsMaps, workerMsg.getElementsMaps());
 		mergeData(this.abstractElementsMaps, workerMsg.abstractElementsMaps);
@@ -172,7 +244,28 @@ public class ParsePatchActor extends UntypedActor {
 		mergeData(this.stmtBuggyElementTypesMaps, workerMsg.stmtBuggyElementTypesMaps);
 		mergeData(this.patchCommitIds, workerMsg.patchCommitIds);
 	}
-
+	
+	private void mergeData1(Map<String, Pair<Integer, List<String>>> targetMap, Map<String, Pair<Integer, List<String>>> map) {
+		for (Map.Entry<String, Pair<Integer, List<String>>> entry : map.entrySet()) {
+			String key = entry.getKey();
+			Pair<Integer, List<String>> value = entry.getValue();
+			
+			Pair<Integer, List<String>> targetValue = targetMap.get(key);
+			if (targetValue == null) {
+				targetMap.put(key, value);
+			} else { //combine
+//				System.out.format("commit list size before: %d\n", targetValue.getSecond().size());
+//				System.out.format("targetValue commit list size before: %d\n", value.getSecond().size());
+				List<String> addCommitsList = new ArrayList<>();  // fix a bug. java.lang.UnsupportedOperationException if directly use getSecond.addAll
+				addCommitsList.addAll(targetValue.getSecond());
+				addCommitsList.addAll(value.getSecond());
+//				System.out.format("commit list size after: %d\n", addCommitsList.size());
+				targetMap.put(key, new Pair<Integer, List<String>>(value.getFirst() + targetValue.getFirst(), 
+						addCommitsList));
+			}
+		}
+	}
+	
 	private void mergeData(Map<String, Map<String, Integer>> targetMap, Map<String, Map<String, Integer>> map) {
 		for (Map.Entry<String, Map<String, Integer>> entry : map.entrySet()) {
 			String key = entry.getKey();

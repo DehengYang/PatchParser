@@ -1,5 +1,6 @@
 package edu.lu.uni.serval.BugCommit.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,11 +18,22 @@ public class WorkerReturnMessage {
 	public Map<String, Map<String, Integer>> stmtBuggyElementTypesMaps;
 	public List<String> patchCommitIds;
 	public int pureDelRootNodes;
+	public Map<String, Pair<Integer, List<String>>> opCntMap;
+	public List<String>  CCIList = new ArrayList<>();
 
 	public WorkerReturnMessage(int numOfPatches, Map<String, Map<String, Integer>> stmtMaps, Map<String, Map<String, Integer>> elementsMaps) {
 		this.numOfPatches = numOfPatches;
 		this.stmtMaps = stmtMaps;
 		this.elementsMaps = elementsMaps;
+	}
+	
+	public WorkerReturnMessage(int numOfPatches, Map<String, Map<String, Integer>> stmtMaps, Map<String, Map<String, Integer>> elementsMaps,
+			Map<String, Pair<Integer, List<String>>> opCntMap, List<String>  CCIList) {
+		this.numOfPatches = numOfPatches;
+		this.stmtMaps = stmtMaps;
+		this.elementsMaps = elementsMaps;
+		this.opCntMap = opCntMap;
+		this.CCIList = CCIList;
 	}
 	
 	public int getNumOfPatches() {

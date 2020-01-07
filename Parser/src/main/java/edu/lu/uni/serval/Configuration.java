@@ -1,5 +1,6 @@
 package edu.lu.uni.serval;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class Configuration {
 	public static int commitIdLength = 8;
 	public static Map<String, Integer> commitNoMap = new HashMap<>();  // commitId number
 	public static Map<String, Integer> commitExecutedNoMap = new HashMap<>();  // commitId number
+	public static Date commitTime = new Date(0); // bug fix.   add 0 as a parameter
 		
 		
 	public static final String BUG_REPORT_URL = "https://issues.apache.org/jira/browse/";

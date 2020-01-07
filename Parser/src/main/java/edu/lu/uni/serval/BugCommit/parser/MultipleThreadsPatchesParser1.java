@@ -3,6 +3,7 @@ package edu.lu.uni.serval.BugCommit.parser;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import edu.lu.uni.serval.Configuration;
 import edu.lu.uni.serval.BugCommit.BugDiff;
+import edu.lu.uni.serval.utils.FileHelper;
 
 /**
  * Parse all patches together.
@@ -42,7 +44,9 @@ public class MultipleThreadsPatchesParser1 {
 		ActorSystem system = null;
 		ActorRef parsingActor = null;
 		// dale 1
-		int numberOfWorkers = 1; //00;
+		int numberOfWorkers = 50; //00;
+		setTime();
+		
 		final WorkMessage msg = new WorkMessage(0, msgFiles);
 		try {
 //			log.info("Parsing begins...");
@@ -90,6 +94,37 @@ public class MultipleThreadsPatchesParser1 {
 		return msgFiles;
 	}
 	
+	private void setTime() throws ParseException {
+		// clear CII file.
+		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII-info");
+		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII");
+		
+		// get Proj_id time
+		String commitTimePath = Configuration.BUGS + Configuration.PROJ_BUG + "/"
+				+ Configuration.ID + "/"; //CommitId-
+		File commitTimePathFile = new File(commitTimePath);
+		File[] files =  commitTimePathFile.listFiles();
+		List<String> timeList =  new ArrayList<>();
+		for(File file : files){
+			if(file.getName().startsWith("CommitId-")){ // records time.
+				String[] timeLines = FileHelper.readFile(file).trim().split("\n");
+				for(String timeLine : timeLines){
+					if(!timeList.contains(timeLine)){
+						timeList.add(timeLine);
+						timeLine = timeLine.split("\\+")[0].trim();
+						SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						Configuration.commitTime = format.parse(timeLine);
+					}
+				}
+				
+				if(timeList.size() > 1){
+					FileHelper.outputToFile(commitTimePath + "timeError" + file.getName(), "", false);
+				}
+			}
+		}
+		
+	}
+
 	private List<MessageFile> readMessageFiles(String path, String dataType) throws IOException, ParseException {
 		List<MessageFile> msgFiles = new ArrayList<>();
 		File[] projects = new File(path + dataType).listFiles();
@@ -113,13 +148,13 @@ public class MultipleThreadsPatchesParser1 {
 						Date commitTime = BugDiff.getCommitTime(commitId);
 						msgFile.setCommitTime(commitTime);
 						
-						if(Configuration.commitNoMap.containsKey(commitId)){
-							int number = Configuration.commitNoMap.get(commitId);
-							Configuration.commitNoMap.put(commitId, number + 1);
-						}else{
-							Configuration.commitNoMap.put(commitId, 1);
-//							Configuration.commitExecutedNoMap.put(commitId, 0);
-						}
+//						if(Configuration.commitNoMap.containsKey(commitId)){
+//							int number = Configuration.commitNoMap.get(commitId);
+//							Configuration.commitNoMap.put(commitId, number + 1);
+//						}else{
+//							Configuration.commitNoMap.put(commitId, 1);
+////							Configuration.commitExecutedNoMap.put(commitId, 0);
+//						}
 						
 						msgFiles.add(msgFile);
 					}
