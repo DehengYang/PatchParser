@@ -63,7 +63,9 @@ public class HierarchicalRegrouper {
 				String astNodeType = actSet.getAstNodeType();
 				if (astNodeType.equals("TypeDeclaration") || astNodeType.equals("FieldDeclaration")  || astNodeType.equals("EnumDeclaration") || 
 						astNodeType.equals("MethodDeclaration") || astNodeType.endsWith("Statement") || 
-						astNodeType.equals("ConstructorInvocation") || astNodeType.equals("CatchClause") || astNodeType.equals("SwitchCase")) {
+						astNodeType.equals("ConstructorInvocation") || astNodeType.equals("CatchClause") || astNodeType.equals("SwitchCase")
+						|| astNodeType.equals("SuperConstructorInvocation")) {
+					//dale add SuperConstructorInvocation
 					reActionSets.add(actSet);
 				} else {
 					// TODO: discarded?
