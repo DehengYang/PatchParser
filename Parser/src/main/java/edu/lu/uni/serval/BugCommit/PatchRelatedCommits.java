@@ -52,7 +52,8 @@ public class PatchRelatedCommits {
 				gitRepo.createFilesForGumTree(outputPath + "Keywords/" + repoName + "_allCommits/", commitsDiffentries, commitMap, Configuration.PRINT_ALLCOMMIT);
 //				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_allCommits.txt", commits);
 				
-				matchCommitId2();
+//				matchCommitId2(); // read from commit-db
+				matchCommitId(diffMap, commitMap);
 				
 				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
 				System.out.println("Keywords-matching Commits: " + keywordPatchCommits.size());
@@ -112,7 +113,12 @@ public class PatchRelatedCommits {
 				
 				// is this commit
 				// may change to isThisCommitFlag == diffHunks.size()... Not sure.
-				if (isThisCommitFlag == diffHunks.size()){ // > 0){
+				
+				// This is strict commit match (i.e., ==)
+				// if (isThisCommitFlag == diffHunks.size()){
+				
+				// This is loose commit match (i.e., >= 0.5)
+				if (isThisCommitFlag >= 0.5*diffHunks.size()){ // > 0){
 //					System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, commitId);
 					String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + commitId;
 					String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 
