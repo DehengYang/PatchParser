@@ -6,13 +6,13 @@ import java.util.Map;
 
 public class Configuration {
 	// dale : parameters.
-	public static String D4J_REPO = "/home/deheng/ALL_APR_TOOLS/d4j-repo/";
-	public static String commitDB = "/home/deheng/env/defects4j/framework/projects/";
-	public static String PROJ_BUG = "Closure";//"Chart";
-	public static String PROJECT = "closure-compiler";//"jfreechart";
-	public static String ID = "24";
+	public static String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
+	public static String commitDB = "/home/dale/env/defects4j/framework/projects/";
+	public static String PROJ_BUG = "Chart";//"Chart";
+	public static String PROJECT = "jfreechart";//"jfreechart";
+	public static String ID = "19";
 	public static boolean DELETE_PatchCommitsDir = true;
-	public static boolean PRINT_ALLCOMMIT = true;
+	public static boolean PRINT_ALLCOMMIT = false;
 	public static String CIIPath;
 	public static String CIIPurePath;
 	public static String USER_NAME = "deheng";
