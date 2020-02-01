@@ -18,18 +18,30 @@ import edu.lu.uni.serval.git.travel.CommitDiffEntry;
 import edu.lu.uni.serval.git.travel.GitRepository;
 import edu.lu.uni.serval.utils.FileHelper;
 
+//modified by apr
 public class PatchRelatedCommits {
 	
+	// Parameters:
+	// projectsPath: Configuration.SUBJECTS_PATH -> ../subjects/
+	// outputPath: Configuration.PATCH_COMMITS_PATH -> ../data/PatchCommits/
+	// *urlPath: Configuration.BUG_REPORTS_PATH -> ../data/BugReports/
+	// * means not used now.
 	public void collectCommits(String projectsPath, String outputPath, String urlPath) {
 		File[] projects = new File(projectsPath).listFiles();
 		
-		// dale
+		// delete/init ../data/PatchCommits/ dir.
 		if(Configuration.DELETE_PatchCommitsDir){
 			FileHelper.deleteDirectory(outputPath);
 		}
 
 		for (File project : projects) {
-			if (!project.isDirectory()  || ! project.getName().equals(Configuration.PROJECT)) continue;
+			// only collect Configuration.PROJECT
+			if (!project.isDirectory()  || 
+					! project.getName().equals(Configuration.PROJECT)) {
+				continue;
+			}
+			
+			// parse repo
 			String repoName = project.getName();
 			String revisedFilesPath = "";
 			String previousFilesPath = "";
@@ -42,10 +54,10 @@ public class PatchRelatedCommits {
 				List<RevCommit> commits = gitRepo.getAllCommits(false);
 				System.out.println("All Commits: " + commits.size());
 				
-				//dale: get all chart bugs diff info 
+				//get all target (e.g., Chart) bugs diff info 
 				Configuration.PROJECT = project.getName();
 				BugDiff bugDiff = new BugDiff();
-				Map<Integer, List<String>>  diffMap = bugDiff.getChart();
+				Map<Integer, List<String>>  diffMap = bugDiff.getChart();  // id, diffHunkList
 				Map<String,  List<Pair<String, String>>>  commitMap = new HashMap<>();
 				List<CommitDiffEntry> commitsDiffentries = gitRepo.getCommitDiffEntries(commits);
 				// TODO: only false in debugging mode.
@@ -81,7 +93,7 @@ public class PatchRelatedCommits {
 		}
 	}
 
-	// only for chart
+	// only for chart, of which the commit-db does not contain commit ids.
 	private void matchCommitId(Map<Integer, List<String>> diffMap, Map<String, List<Pair<String, String>>> commitMap) throws IOException {
 		for(Map.Entry<String, List<Pair<String,String>>> entry : commitMap.entrySet()){
 			String commitId = entry.getKey();

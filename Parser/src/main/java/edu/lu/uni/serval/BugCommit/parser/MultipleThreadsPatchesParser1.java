@@ -79,7 +79,7 @@ public class MultipleThreadsPatchesParser1 {
 							if (revFile.getName().startsWith("fixed-")) {
 								String fileName = revFile.getName();
 								File prevFile = new File(projIdDir + fileName.replace("fixed-", "buggy-"));// previous file
-//								File diffentryFile = new File(projIdDir + "diffInfo.txt"); // DiffEntry file
+//								File diffentryFile = new File(projIdDir + "bugDiff.txt"); // DiffEntry file
 								MessageFile msgFile = new MessageFile(revFile, prevFile);
 								msgFile.setProj(project.getName());
 								msgFile.setId(idDir.getName());

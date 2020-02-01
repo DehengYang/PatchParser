@@ -24,6 +24,7 @@ import edu.lu.uni.serval.Configuration;
 import edu.lu.uni.serval.utils.FileHelper;
 
 /*
+ * Added by apr
  * This is to get all D4J bugs diff info
  * 
  */
@@ -50,18 +51,21 @@ public class BugDiff {
 		return FileHelper.readFile(allPath).split("\n")[0]; // srcPath
 	}
 	
+	/*
+	 * get diff info by running shell script
+	 */
 	public String getShellDiff(String proj, int id) throws IOException{
 		String repoBuggy = Configuration.D4J_REPO;
 		String repoFixed = Configuration.D4J_REPO + "fixed_bugs_dir/";
 		String[] cmd = {"/bin/sh","-c", "cd " + repoBuggy 
 				+ " && " + "/bin/bash single-download.sh "
 				+ proj + " " + id + " 1"};
-//		shellRun2(cmd);
+		shellRun2(cmd); // download buggy program
 		
 		String[] cmd2 = {"/bin/sh","-c", "cd " + repoFixed 
 				+ " && " + "/bin/bash  fixed_single_download.sh "
 				+ proj + " " + id + " 1"};
-//		shellRun2(cmd2);
+		shellRun2(cmd2); // download fixed program
 		
 		String srcPath = getSrc(proj, id);
 		String buggySrcPath = repoBuggy + proj + "/" + proj + "_" + id + srcPath;
@@ -72,22 +76,31 @@ public class BugDiff {
 				+ buggySrcPath + " " + fixedrcPath
 				};
 		String shellDiff = shellRun2(cmd3);
-//		System.out.println("shellDiff: \n" + shellDiff);
+//		System.out.println("shellDiff: \n" + shellDiff); //debug
 		return shellDiff;
 	}
 	
+	/*
+	 * Not only target chart, but also other programs.
+	 */
 	public Map<Integer, List<String>> getChart() throws IOException{
 		String proj = Configuration.PROJ_BUG;
 		Map<Integer, List<String>> diffMap = new HashMap<>();
-		for(int id = 1; id <= Configuration.numOfBugs.get(Configuration.PROJECT); id++){ //test : Chart 1, 14   // Configuration.numOfBugs.get(Configuration.PROJ_BUG)
+		
+		// e.g., for chart, from Chart-1 to Chart-26
+		for(int id = 1; id <= Configuration.numOfBugs.get(Configuration.PROJ_BUG); id++){
+
+			// seems a method to get diff, but not used
 //			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);
+			
 			String shellDiff = getShellDiff(proj, id);
 			
 			// save shell diff
-			String targetPath = Configuration.BUGS + proj + "/" + id + "/diffInfo.txt";
+			String targetPath = Configuration.BUGS + proj + "/" + id + "/bugDiff.txt";
 			FileHelper.outputToFile(targetPath, shellDiff, false);
 			
+			// find and save buggy file(s) & fixed file(s)
 			String[] diffLines = shellDiff.split("\n");
 			List<String> diffHunkList = new ArrayList<>();
 			boolean curFlag = false;
@@ -119,6 +132,7 @@ public class BugDiff {
 						}
 						
 						curFlag = true; // is a diff
+						// save diff into diffHunkList, only conjunctive lines are saved.
 					}else{
 						curFlag = false;
 					}
@@ -128,7 +142,6 @@ public class BugDiff {
 			}
 			
 			diffMap.put(id, diffHunkList);
-//			System.out.print("");
 		}
 		return diffMap;
 	}
@@ -151,13 +164,13 @@ public class BugDiff {
 		
 	}
 
-	// dale: simple run
+	// simple run
 	public static String shellRun2(String cmd) throws IOException {
         Process process= Runtime.getRuntime().exec(cmd);
         String results = getShellOut(process);
         return results;
 	}
-	// dale: simple run
+	// simple run
 	public static String shellRun2(String[] cmd) throws IOException {
 		Process process= Runtime.getRuntime().exec(cmd);
 		String results = getShellOut(process);

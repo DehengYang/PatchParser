@@ -18,12 +18,12 @@ public class Configuration {
 	public static String USER_NAME = "deheng";
 	public static Map<String, Integer> numOfBugs = new HashMap<>();
 	static{
-		numOfBugs.put("jfreechart", 26);
-		numOfBugs.put("closure-compiler", 133); //176  //TODO
-		numOfBugs.put("commons-lang", 65);
-		numOfBugs.put("commons-math", 106);
-		numOfBugs.put("joda-time", 27);
-		numOfBugs.put("mockito", 38);
+		numOfBugs.put("Chart", 26);
+		numOfBugs.put("Closure", 133); //176  //TODO
+		numOfBugs.put("Lang", 65);
+		numOfBugs.put("Math", 106);
+		numOfBugs.put("Time", 27);
+		numOfBugs.put("Mockito", 38);
 	}
 	public static int commitIdLength = 8;
 	public static Map<String, Integer> commitNoMap = new HashMap<>();  // commitId number

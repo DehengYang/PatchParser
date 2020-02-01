@@ -1,8 +1,6 @@
 package edu.lu.uni.serval;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -12,26 +10,25 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import edu.lu.uni.serval.BugCommit.Distribution;
-import edu.lu.uni.serval.BugCommit.DownloadBugReports;
 import edu.lu.uni.serval.BugCommit.PatchRelatedCommits;
 import edu.lu.uni.serval.BugCommit.filter.MultipleThreadsPatchCommitsFilter;
-import edu.lu.uni.serval.utils.FileHelper;
 
+// modified by apr
 public class Main {
 
 	public static void main(String[] args) throws IOException {
-		// dale
+		// parse parameter.
 		setParameters(args);
-				
+			
+		// obtain project loc info
 		System.out.println("======================================================================================");
 		System.out.println("Statistics of project LOC.");
 		System.out.println("======================================================================================");
 		new Distribution().countLOC(Configuration.SUBJECTS_PATH);
 		
-		//dale
-//		FileHelper.deleteDirectory(Configuration.BUGS);
+		// obtain all fix commits
 		System.out.println("\n\n\n======================================================================================");
-		System.out.println("Collect bug-fix-related commits with bugID of bug reports and bug-related keywords,\n"
+		System.out.println("Collect bug-fix-related commits via bug-related keywords matching,\n"
 				+ "and Fileter out test Java code changes.");
 		System.out.println("======================================================================================");
 		PatchRelatedCommits prc = new PatchRelatedCommits();
