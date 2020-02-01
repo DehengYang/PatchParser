@@ -117,14 +117,11 @@ public class PatchRelatedCommits {
 				for (String diffHunk : diffHunks){
 					// when the diff hunk is "- }", may need to skip. i.e., do not add flag with 1
 					if (diffEntryContent.indexOf(diffHunk) == -1){
-						break; // not contain 
+						continue; // not contain 
 					}else{
 						isThisCommitFlag++;
 					}
 				}
-				
-				// is this commit
-				// may change to isThisCommitFlag == diffHunks.size()... Not sure.
 				
 				// This is strict commit match (i.e., ==)
 				// if (isThisCommitFlag == diffHunks.size()){
