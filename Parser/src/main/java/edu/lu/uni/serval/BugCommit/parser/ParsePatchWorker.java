@@ -76,7 +76,7 @@ public class ParsePatchWorker extends UntypedActor {
 			// dale for collect fix patterns
 			Map<String, Pair<Integer, List<String>>> opCntMap = new HashMap<>();
 			
-			// collect D4J bug CII
+			// collect D4J bug CCI
 			List<String> CCIList = new ArrayList<>();
 			
 			
@@ -262,12 +262,12 @@ public class ParsePatchWorker extends UntypedActor {
 	private List<String> analyzePatches2(Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches, String patchCommitId, Map<String, Pair<Integer, List<String>>> opCntMap, String revName) {
 		// init && clear 
 		List<String> strOpListAll = new ArrayList<>();
-		String CIIPath = Configuration.CIIPath + patchCommitId + ".txt";
-		String CIIPurePath = Configuration.CIIPurePath + patchCommitId + ".txt"; // only collect CII info.
+		String CCIPath = Configuration.CCIPath + patchCommitId + ".txt";
+		String CCIPurePath = Configuration.CCIPurePath + patchCommitId + ".txt"; // only collect CII info.
 		
 		// fix : should be true, because one commit id may have more than one msgfile.
-		FileHelper.outputToFile(CIIPath, "", true); // including CII, hunk and hAS info.
-		FileHelper.outputToFile(CIIPurePath, "", true);
+		FileHelper.outputToFile(CCIPath, "", true); // including CII, hunk and hAS info.
+		FileHelper.outputToFile(CCIPurePath, "", true);
 		
 		// each hunk
 		for(Map.Entry<DiffEntryHunk, List<HierarchicalActionSet>> entry:allPatches.entrySet()){
@@ -276,7 +276,7 @@ public class ParsePatchWorker extends UntypedActor {
 			
 			// print hunk info 
 			//System.out.println("hunk:\n" + hunk.toString() + "hASList: \n" + hASList.toString());
-			FileHelper.outputToFile(CIIPath, "hunk:\n" + hunk.toString() + "\n\n\nhASList: \n" + hASList.toString() + "\n\n\n", true);
+			FileHelper.outputToFile(CCIPath, "hunk:\n" + hunk.toString() + "\n\n\nhASList: \n" + hASList.toString() + "\n\n\n", true);
 			
 			for (HierarchicalActionSet hAS : hASList){
 				// operations based on string
@@ -390,8 +390,8 @@ public class ParsePatchWorker extends UntypedActor {
 					opCntMap.put(strOpList, new Pair<>(addCnt, ids));
 				}
 				
-				FileHelper.outputToFile(CIIPath, "CII:\n" + strOpList + "\n\n\n", true);
-				FileHelper.outputToFile(CIIPurePath, strOpList + "\n\n", true);
+				FileHelper.outputToFile(CCIPath, "CII:\n" + strOpList + "\n\n\n", true);
+				FileHelper.outputToFile(CCIPurePath, strOpList + "\n\n", true);
 				
 //				if (new File(Configuration.AllCCI + patchCommitId).exists()){
 //					System.out.format("patchCommitId %s write again.\n", patchCommitId);
@@ -400,7 +400,7 @@ public class ParsePatchWorker extends UntypedActor {
 			}
 //			System.out.println();
 //			for (String str : strOpListAll){
-//				FileHelper.outputToFile(this.outputPath + "CII/" + patchCommitId + ".txt", str, true);
+//				FileHelper.outputToFile(this.outputPath + "CCI/" + patchCommitId + ".txt", str, true);
 //			}
 		}
 		return strOpListAll;
@@ -522,10 +522,10 @@ public class ParsePatchWorker extends UntypedActor {
 			//System.out.println("strOpList: \n" + strOpList);
 			CCIList.add(strOpList);
 			
-			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CII-info", 
+			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CCI-info", 
 					"\n\nhASList: \n" + hASList.toString() + "\n\n"
-					+ "CII:\n" + strOpList + "\n\n\n", true);
-			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CII", strOpList + "\n\n", true);
+					+ "CCI:\n" + strOpList + "\n\n\n", true);
+			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CCI", strOpList + "\n\n", true);
 		}
 	}
 

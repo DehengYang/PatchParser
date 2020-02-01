@@ -13,8 +13,8 @@ public class Configuration {
 	public static String ID = "19";
 	public static boolean DELETE_PatchCommitsDir = true;
 	public static boolean PRINT_ALLCOMMIT = false;
-	public static String CIIPath;
-	public static String CIIPurePath;
+	public static String CCIPath;
+	public static String CCIPurePath;
 	public static String USER_NAME = "deheng";
 	public static Map<String, Integer> numOfBugs = new HashMap<>();
 	static{

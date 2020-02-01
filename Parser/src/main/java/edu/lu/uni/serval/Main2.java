@@ -14,19 +14,20 @@ import edu.lu.uni.serval.BugCommit.Distribution;
 import edu.lu.uni.serval.BugCommit.parser.MultipleThreadsPatchesParser1;
 import edu.lu.uni.serval.utils.FileHelper;
 
+// modified by apr
 public class Main2 {
 
 	public static void main(String[] args) throws IOException, ParseException  {
-		// dale
+		// parse parameters
 		setParameters(args);
 		Configuration.commitNoMap.clear();
 		Configuration.commitExecutedNoMap.clear();
 		
 		// delete first
-		Configuration.CIIPath = Configuration.PARSE_RESULTS_PATH + "CII/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
-		Configuration.CIIPurePath = Configuration.PARSE_RESULTS_PATH + "CII-pure/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
-		FileHelper.deleteDirectory(Configuration.CIIPath);
-		FileHelper.deleteDirectory(Configuration.CIIPurePath);
+		Configuration.CCIPath = Configuration.PARSE_RESULTS_PATH + "CCI/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
+		Configuration.CCIPurePath = Configuration.PARSE_RESULTS_PATH + "CCI-pure/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
+		FileHelper.deleteDirectory(Configuration.CCIPath);
+		FileHelper.deleteDirectory(Configuration.CCIPurePath);
 		
 //		System.out.println("\n\n\n======================================================================================");
 //		System.out.println("Statistics of diff hunk sizes of code changes.");
