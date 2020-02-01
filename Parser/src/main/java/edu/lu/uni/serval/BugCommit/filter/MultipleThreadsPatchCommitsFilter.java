@@ -20,17 +20,24 @@ public class MultipleThreadsPatchCommitsFilter {
 	
 //	private static Logger log = LoggerFactory.getLogger(MultipleThreadsPatchCommitsFilter.class);
 
+	/*
+	 * subjectsPath -> Configuration.SUBJECTS_PATH -> ../subjects/
+	 * outputPath -> Configuration.PATCH_COMMITS_PATH -> ../data/PatchCommits/
+	 */
 	@SuppressWarnings("deprecation")
 	public void filter(String subjectsPath, String outputPath) {
 		File[] projects = new File(subjectsPath).listFiles();
 		for (File project : projects) {
-			if (project.isDirectory()  && project.getName().equals(Configuration.PROJECT)) {  // fix here
+			if (project.isDirectory()  
+					&& project.getName().equals(Configuration.PROJECT)) {  // fix here
 				String projectName = project.getName();
 				final List<MessageFile> msgFiles = readMessageFiles(projectName, outputPath);
 				ActorSystem system = null;
 				ActorRef parsingActor = null;
-				// dale
-				int numberOfWorkers = 50; //dale try to use 100
+				// it's okay to set this as 50, or 16, or 20 ...
+				int numberOfWorkers = 50; 
+				
+				// not used
 //				if( ! Configuration.numOfWorkers.keySet().contains(projectName)){
 //					numberOfWorkers = 1;
 //				}else{
@@ -51,11 +58,15 @@ public class MultipleThreadsPatchCommitsFilter {
 		}
 	}
 
-	
+	/*
+	 * read all commits from ../data/PatchCommits/Keywords/ directory
+	 */
 	private List<MessageFile> readMessageFiles(String projectName, String path) {
 		List<MessageFile> msgFiles = new ArrayList<>();
 		String keywordPatchsFile = path + "Keywords/" + projectName;
-		String linkedPatchsFile = path + "Linked/" + projectName;
+		// bug report-linked bug not used
+//		String linkedPatchsFile = path + "Linked/" + projectName;
+
 		List<String> commitIds = new ArrayList<>();
 		
 		msgFiles.addAll(getMessageFiles(keywordPatchsFile, "Keywords", commitIds));

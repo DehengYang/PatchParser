@@ -142,7 +142,7 @@ public class PatchRelatedCommits {
 		}
 	}
 	
-	// for closure 
+	// for closure, of which the commit-db is available
 	private void matchCommitId2() throws IOException {
 		String[] commitContent = FileHelper.readFile(Configuration.commitDB + Configuration.PROJ_BUG + "/commit-db").split("\n");
 		Map<Integer, String> idCommitMap = new HashMap<>();
