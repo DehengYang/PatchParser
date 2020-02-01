@@ -95,14 +95,21 @@ public class PatchRelatedCommits {
 
 	// only for chart, of which the commit-db does not contain commit ids.
 	private void matchCommitId(Map<Integer, List<String>> diffMap, Map<String, List<Pair<String, String>>> commitMap) throws IOException {
+		// traverse all commits of repo. (e.g., jfreechart)
 		for(Map.Entry<String, List<Pair<String,String>>> entry : commitMap.entrySet()){
 			String commitId = entry.getKey();
 			List<Pair<String,String>> diffEntryList =  entry.getValue();
+			
+			// for debug.
+			if (!commitId.equals("00ebcc58")){
+				continue;
+			}
 			
 			// read all diffs of a commit
 			String diffEntryContent = "";
 			for(Pair<String,String> diffEntry : diffEntryList){
 				File diffEntryFile = new File(diffEntry.getSecond()); 
+				// ../data/PatchCommits/Keywords/jfreechart_allCommits/DiffEntries/00ebcc58_cf48acfb_source#org#jfree#data#time#TimeSeries.txt
 				if(diffEntryFile.exists()){// check if exist
 					diffEntryContent += FileHelper.readFile(diffEntryFile).replace("\n", "");
 				}

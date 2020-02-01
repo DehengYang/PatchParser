@@ -12,7 +12,7 @@ public class Configuration {
 	public static String PROJECT = "jfreechart";//"jfreechart";
 	public static String ID = "19";
 	public static boolean DELETE_PatchCommitsDir = true;
-	public static boolean PRINT_ALLCOMMIT = false;
+	public static boolean PRINT_ALLCOMMIT = true;
 	public static String CCIPath;
 	public static String CCIPurePath;
 //	public static String USER_NAME = "deheng";
