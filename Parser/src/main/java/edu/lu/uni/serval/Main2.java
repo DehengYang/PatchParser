@@ -23,7 +23,7 @@ public class Main2 {
 		Configuration.commitNoMap.clear();
 		Configuration.commitExecutedNoMap.clear();
 		
-		// delete first
+		// delete first, For example: ../data/ParseResults/CCI/Chart/20
 		Configuration.CCIPath = Configuration.PARSE_RESULTS_PATH + "CCI/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
 		Configuration.CCIPurePath = Configuration.PARSE_RESULTS_PATH + "CCI-pure/" + Configuration.PROJ_BUG + "/" + Configuration.ID + "/";
 		FileHelper.deleteDirectory(Configuration.CCIPath);
@@ -32,6 +32,7 @@ public class Main2 {
 //		System.out.println("\n\n\n======================================================================================");
 //		System.out.println("Statistics of diff hunk sizes of code changes.");
 //		System.out.println("======================================================================================");
+		// set the threshold of patch hunks.
 		new Distribution().statistics(Configuration.PATCH_COMMITS_PATH, Configuration.DIFFENTRY_SIZE_PATH);
 		
 //		System.out.println("\n\n\n======================================================================================");
@@ -55,12 +56,15 @@ public class Main2 {
         opt3.setRequired(false);
         Option opt4 = new Option("id","ID",true,"e.g., 2");
         opt4.setRequired(false);
+        Option opt5 = new Option("singleBug","SINGLE",true,"e.g., false");
+        opt4.setRequired(false);
 
         Options options = new Options();
         options.addOption(opt1);
         options.addOption(opt2);
         options.addOption(opt3);
         options.addOption(opt4);
+        options.addOption(opt5);
 
         CommandLine cli = null;
         CommandLineParser cliParser = new DefaultParser();
@@ -85,8 +89,18 @@ public class Main2 {
         if(cli.hasOption("id")){
         	Configuration.ID = cli.getOptionValue("id");
         }
+        if(cli.hasOption("singleBug")){
+        	String single = cli.getOptionValue("singleBug");
+        	if (single.equalsIgnoreCase("false")){
+        		Configuration.singleBug = false;
+        	}else if(single.equalsIgnoreCase("true")){
+        		Configuration.singleBug = true;
+        	}else{
+        		System.out.println("Wrong format of SINGLE parameter.");
+        	}
+        }
         
-        System.out.format("Proj: %s, ID: %s", Configuration.PROJ_BUG, Configuration.ID);
+        System.out.format("oriProj: %s, bugProj: %s, id: %s", Configuration.PROJECT, Configuration.PROJ_BUG, Configuration.ID);
         
         // set project dir
     }

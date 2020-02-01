@@ -31,10 +31,10 @@ public class MultipleThreadsPatchesParser1 {
 	public void parse(String patchPath, String outputPath) throws IOException, ParseException {
 		int bugHunkSize = Configuration.sizeThreshold.get("buggy hunk");
 		int fixHunkSize = Configuration.sizeThreshold.get("fixed hunk");
-		// dale add
+		// add e.g., Chart-1 buggy file & fixed file
 		List<MessageFile> msgFiles = readMessageFiles2();
 		
-		// dale comment
+		// comment: "Linked" not used.
 //		List<MessageFile> msgFiles = readMessageFiles(patchPath, "Linked");
 //		msgFiles.addAll(readMessageFiles(patchPath, "Keywords"));
 		List<MessageFile> msgFiles2 = readMessageFiles(patchPath, "Keywords");
@@ -43,8 +43,8 @@ public class MultipleThreadsPatchesParser1 {
 		
 		ActorSystem system = null;
 		ActorRef parsingActor = null;
-		// dale 1
-		int numberOfWorkers = 50; //00;
+		
+		int numberOfWorkers = 50;
 		setTime();
 		
 		final WorkMessage msg = new WorkMessage(0, msgFiles);
@@ -94,10 +94,13 @@ public class MultipleThreadsPatchesParser1 {
 		return msgFiles;
 	}
 	
+	/*
+	 * read time of bug (e.g., Chart-1) from commitTimePath
+	 */
 	private void setTime() throws ParseException {
-		// clear CII file.
-		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII-info");
-		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CII");
+		// clear CCI file.
+		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CCI-info");
+		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CCI");
 		
 		// get Proj_id time
 		String commitTimePath = Configuration.BUGS + Configuration.PROJ_BUG + "/"

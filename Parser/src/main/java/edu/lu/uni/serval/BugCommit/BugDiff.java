@@ -90,6 +90,10 @@ public class BugDiff {
 		// e.g., for chart, from Chart-1 to Chart-26
 		for(int id = 1; id <= Configuration.numOfBugs.get(Configuration.PROJ_BUG); id++){
 
+			if (Configuration.singleBug && 
+					Integer.parseInt(Configuration.ID) != id){
+				continue;
+			}
 			// seems a method to get diff, but not used
 //			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);

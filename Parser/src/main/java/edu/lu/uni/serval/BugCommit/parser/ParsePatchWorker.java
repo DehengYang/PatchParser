@@ -61,7 +61,7 @@ public class ParsePatchWorker extends UntypedActor {
 			List<MessageFile> msgFiles = workMsg.getMsgFiles();
 			List<String> patchCommitIds = new ArrayList<>();
 			
-			// dale
+			// print current worker id, and its msgFiles size.
 			System.out.println("\nworkerId: " + workerId + "\nmsgFiles.size: " + msgFiles.size());
 			
 			int numOfPatches = 0;
@@ -71,15 +71,13 @@ public class ParsePatchWorker extends UntypedActor {
 			int overRap = 0;
 			
 			Map<DiffEntryHunk, List<HierarchicalActionSet>> allPatches = new HashMap<>();
-			// dale
+			// init patchCommitId
 			String patchCommitId = null;
-			// dale for collect fix patterns
+			// this is to collect fix patterns/change actions/CCI(code change instructions)
 			Map<String, Pair<Integer, List<String>>> opCntMap = new HashMap<>();
 			
 			// collect D4J bug CCI
 			List<String> CCIList = new ArrayList<>();
-			
-			
 			
 			for (MessageFile msgFile : msgFiles) {
 				File revFile = msgFile.getRevFile();
@@ -105,7 +103,9 @@ public class ParsePatchWorker extends UntypedActor {
 					
 					patchCommitId = revFile.getName().substring(0, Configuration.commitIdLength);
 					
-					if (msgFile.getId() == null && msgFile.getCommitTime().compareTo(Configuration.commitTime) < 0 ){// ) {  // && msgFile.getCommitTime().compareTo(commitTime) < 0 ){
+					// only get commit history 
+					if (msgFile.getId() == null 
+							&& msgFile.getCommitTime().compareTo(Configuration.commitTime) < 0 ){
 						File cciFile = new File(Configuration.AllCCI + revFile.getName());
 						if(cciFile.exists()){//Configuration.commitNoMap.get(patchCommitId) == Configuration.commitExecutedNoMap.get(patchCommitId
 							readCCI(opCntMap, cciFile, patchCommitId);
@@ -407,6 +407,9 @@ public class ParsePatchWorker extends UntypedActor {
 		
 	}
 	
+	/*
+	 * regroup hASList
+	 */
 	private void analyzePatches3(List<HierarchicalActionSet> hASList, String proj, String id, List<String> CCIList) {
 		// init && clear 
 		for (HierarchicalActionSet hAS : hASList){

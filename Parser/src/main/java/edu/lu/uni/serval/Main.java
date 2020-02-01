@@ -55,12 +55,15 @@ public class Main {
         opt3.setRequired(false);
         Option opt4 = new Option("id","ID",true,"e.g., 2");
         opt4.setRequired(false);
+        Option opt5 = new Option("singleBug","SINGLE",true,"e.g., false");
+        opt4.setRequired(false);
 
         Options options = new Options();
         options.addOption(opt1);
         options.addOption(opt2);
         options.addOption(opt3);
         options.addOption(opt4);
+        options.addOption(opt5);
 
         CommandLine cli = null;
         CommandLineParser cliParser = new DefaultParser();
@@ -85,8 +88,18 @@ public class Main {
         if(cli.hasOption("id")){
         	Configuration.ID = cli.getOptionValue("id");
         }
+        if(cli.hasOption("singleBug")){
+        	String single = cli.getOptionValue("singleBug");
+        	if (single.equalsIgnoreCase("false")){
+        		Configuration.singleBug = false;
+        	}else if(single.equalsIgnoreCase("true")){
+        		Configuration.singleBug = true;
+        	}else{
+        		System.out.println("Wrong format of SINGLE parameter.");
+        	}
+        }
         
-        System.out.format("oriProj: %s, bugProj: %s", Configuration.PROJECT, Configuration.PROJ_BUG);
+        System.out.format("oriProj: %s, bugProj: %s, id: %s", Configuration.PROJECT, Configuration.PROJ_BUG, Configuration.ID);
         
         // set project dir
     }

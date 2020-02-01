@@ -15,15 +15,16 @@ public class Configuration {
 	public static boolean PRINT_ALLCOMMIT = false;
 	public static String CCIPath;
 	public static String CCIPurePath;
-	public static String USER_NAME = "deheng";
+//	public static String USER_NAME = "deheng";
+	public static boolean singleBug = false;
 	public static Map<String, Integer> numOfBugs = new HashMap<>();
 	static{
-		numOfBugs.put("Chart", 26);
-		numOfBugs.put("Closure", 133); //176  //TODO
-		numOfBugs.put("Lang", 65);
-		numOfBugs.put("Math", 106);
-		numOfBugs.put("Time", 27);
-		numOfBugs.put("Mockito", 38);
+		numOfBugs.put("Chart", 26);   //jfreechart
+		numOfBugs.put("Closure", 133); //176  //TODO // closure-compiler
+		numOfBugs.put("Lang", 65); // commons-lang
+		numOfBugs.put("Math", 106); // commons-math
+		numOfBugs.put("Time", 27); // joda-time
+		numOfBugs.put("Mockito", 38); // mockito
 	}
 	public static int commitIdLength = 8;
 	public static Map<String, Integer> commitNoMap = new HashMap<>();  // commitId number

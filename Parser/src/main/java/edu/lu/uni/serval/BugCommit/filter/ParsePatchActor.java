@@ -80,6 +80,7 @@ public class ParsePatchActor extends UntypedActor {
 //			logger.info(counter + " workers finished their work...");
 			if (counter >= numberOfWorkers) {
 //				logger.info(projectName + " patch parsing work is finished...");
+				System.out.println(projectName + " patch parsing work is finished...");
 				calculateCommitIds();
 				this.getContext().stop(mineRouter);
 				this.getContext().stop(getSelf());

@@ -54,6 +54,10 @@ public class Distribution {
 		}
 	}
 	
+	/*
+	 * intputPath -> Configuration.PATCH_COMMITS_PATH  -> ../data/PatchCommits/
+	 * outputPath -> Configuration.DIFFENTRY_SIZE_PATH -> ../data/DiffentrySizes/
+	 */
 	public void statistics(String intputPath, String outputPath) {
 		File[] dataTypes = new File(intputPath).listFiles();
 		StringBuilder diffentryRangeBuilder = new StringBuilder();

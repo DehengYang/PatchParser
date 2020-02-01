@@ -135,6 +135,9 @@ public class ParsePatchActor extends UntypedActor {
 		}
 	}
 
+	/*
+	 * write change actions frequency info into FixPatternFreqs.txt
+	 */
 	private void getMatch() {
 		// save to file : opCntMap
 		String FPPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" 
