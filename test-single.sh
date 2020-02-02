@@ -26,8 +26,8 @@ do
 	bugNumber=${bugNumberList[i]}
 
 	# download all bugs for a given program (e.g., Chart -> Chart 1 to 26) 
-	java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main -d4j /home/dale/ALL_APR_TOOLS/d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id 1 -singleBug true
-	java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main2 -d4j /home/dale/ALL_APR_TOOLS/d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id 1
+	java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main -d4j ../d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id 1 -singleBug true
+	#java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main2 -d4j ../d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id 1
 	break 
 
 <<C1
