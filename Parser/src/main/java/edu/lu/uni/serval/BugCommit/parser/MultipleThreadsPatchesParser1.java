@@ -59,7 +59,7 @@ public class MultipleThreadsPatchesParser1 {
 		}
 	}
 
-	// dale : read Chart buggy and fixed files
+	// apr : read Chart buggy and fixed files
 	// ../data/PatchCommits/Keywords/jfreechart   Chart/1/
 	private List<MessageFile> readMessageFiles2() {
 		List<MessageFile> msgFiles = new ArrayList<>();
@@ -99,8 +99,8 @@ public class MultipleThreadsPatchesParser1 {
 	 */
 	private void setTime() throws ParseException {
 		// clear CCI file.
-		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CCI-info");
-		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/CCI");
+		//FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/changeAction-info");
+		FileHelper.deleteFile(Configuration.BUGS + Configuration.PROJ_BUG + "/" + Configuration.ID +"/changeAction.txt");
 		
 		// get Proj_id time
 		String commitTimePath = Configuration.BUGS + Configuration.PROJ_BUG + "/"
@@ -132,7 +132,7 @@ public class MultipleThreadsPatchesParser1 {
 		List<MessageFile> msgFiles = new ArrayList<>();
 		File[] projects = new File(path + dataType).listFiles();
 		for (File project : projects) {
-			// dale change.
+			// apr change.
 			if (project.isDirectory() && ! project.getName().endsWith("_allCommits")) {
 				String projectPath = project.getPath();
 				File revFilesPath = new File(projectPath + "/revFiles/");
@@ -146,7 +146,7 @@ public class MultipleThreadsPatchesParser1 {
 						File diffentryFile = new File(projectPath + "/DiffEntries/" + fileName); // DiffEntry file
 						MessageFile msgFile = new MessageFile(revFile, prevFile, diffentryFile);
 						
-						//dale
+						//apr
 						String commitId = revFile.getName().substring(0, Configuration.commitIdLength);
 						Date commitTime = BugDiff.getCommitTime(commitId);
 						msgFile.setCommitTime(commitTime);

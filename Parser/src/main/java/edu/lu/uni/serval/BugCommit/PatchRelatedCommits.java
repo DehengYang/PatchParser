@@ -65,7 +65,13 @@ public class PatchRelatedCommits {
 //				gitRepo.outputCommitMessages(outputPath + "CommitMessage/" + repoName + "_allCommits.txt", commits);
 				
 //				matchCommitId2(); // read from commit-db
-				matchCommitId(diffMap, commitMap);
+				if (Configuration.PROJ_BUG.equals("Closure")){
+					System.out.println("Read commit id from commit-db.");
+					matchCommitId2(); // read from commit-db
+				}else{
+					System.out.println("Match commit id from all commits.");
+					matchCommitId(diffMap, commitMap);
+				}
 				
 				List<RevCommit> keywordPatchCommits = gitRepo.filterCommits(commits); // searched by keywords.
 				System.out.println("Keywords-matching Commits: " + keywordPatchCommits.size());

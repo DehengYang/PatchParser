@@ -65,7 +65,7 @@ public class HierarchicalRegrouper {
 						astNodeType.equals("MethodDeclaration") || astNodeType.endsWith("Statement") || 
 						astNodeType.equals("ConstructorInvocation") || astNodeType.equals("CatchClause") || astNodeType.equals("SwitchCase")
 						|| astNodeType.equals("SuperConstructorInvocation")) {
-					//dale add SuperConstructorInvocation
+					//apr add SuperConstructorInvocation
 					reActionSets.add(actSet);
 				} else {
 					// TODO: discarded?

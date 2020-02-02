@@ -9,7 +9,7 @@ public class MessageFile {
 	private File prevFile;
 	private File diffEntryFile;
 	private File positionFile;
-	//dale
+	//apr
 	private String proj = null;
 	private String id = null;
 	private Date commitTime = new Date();

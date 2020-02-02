@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Configuration {
-	// dale : parameters.
-	public static String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
-	public static String commitDB = "/home/dale/env/defects4j/framework/projects/";
+	// apr : parameters.
+	public static String D4J_REPO = "../d4j-repo/";
+	public static String commitDB = "../d4j-info/projects/";
 	public static String PROJ_BUG = "Chart";//"Chart";
 	public static String PROJECT = "jfreechart";//"jfreechart";
 	public static String ID = "19";
@@ -15,7 +15,7 @@ public class Configuration {
 	public static boolean PRINT_ALLCOMMIT = true;
 	public static String CCIPath;
 	public static String CCIPurePath;
-//	public static String USER_NAME = "deheng";
+//	public static String USER_NAME = "apr";
 	public static boolean singleBug = false;
 	public static Map<String, Integer> numOfBugs = new HashMap<>();
 	static{
@@ -33,20 +33,20 @@ public class Configuration {
 		
 		
 	public static final String BUG_REPORT_URL = "https://issues.apache.org/jira/browse/";
-	public static String SUBJECTS_PATH = "../subjects/";  //dale
+	public static String SUBJECTS_PATH = "../subjects/";  //apr
 	private static final String OUTPUT_PATH = "../data/";
 	public static final String BUG_REPORTS_PATH = OUTPUT_PATH + "BugReports/";
 	public static final String PATCH_COMMITS_PATH = OUTPUT_PATH + "PatchCommits/";
 	public static final String DIFFENTRY_SIZE_PATH = OUTPUT_PATH + "DiffentrySizes/";
 	public static final String PARSE_RESULTS_PATH = OUTPUT_PATH + "ParseResults/";
 	
-	//dale
+	//apr
 	public static final String AllCCI = OUTPUT_PATH + "AllCCI/";
 	
-	public static final long TIMEOUT_THRESHOLD = 108000L; //1800L; dale debug
+	public static final long TIMEOUT_THRESHOLD = 108000L; //1800L; apr debug
 	
-	// dale: get current dir path
-	// /home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/Parser
+	// apr: get current dir path
+	// /home/apr/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/Parser
 	public static final String HOME = System.getProperty("user.dir") + "/";
 	public static final String BUGS = OUTPUT_PATH + "bugs/";
 	

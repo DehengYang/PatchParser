@@ -238,7 +238,7 @@ public class GitRepository {
 		 */
 		String shortMessage = commit.getShortMessage().toLowerCase(); 
 		String fullMessage = commit.getFullMessage().toLowerCase();
-		// dale
+		// apr
 //		String commitStr = commit.toString();
 		List<String> bugRelatedWords = BugRelatedWords.BUG_RELATED_KEY_WORDS;
 		
@@ -1011,7 +1011,7 @@ public class GitRepository {
 				previousFileContent = getFileContent(parentCommit, diffentry.getOldPath());
 				previousFile = new File(outputPath + "prevFiles/prev_" + fileName);
 				
-				//dale
+				//apr
 				Pair<String, String> files = new Pair<String, String>(outputPath + "revFiles/" + fileName, outputPath + "DiffEntries/" + fileName.replace(".java", ".txt"));
 				if(commitMap.containsKey(commitId)){
 					List<Pair<String, String>> commitFiles = commitMap.get(commitId);

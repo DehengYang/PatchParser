@@ -42,12 +42,12 @@ public class Main {
 	}
 	
 	private static void setParameters(String[] args) {
-//		public static String D4J_REPO = "/home/dale/ALL_APR_TOOLS/d4j-repo/";
+//		public static String D4J_REPO = "/home/apr/ALL_APR_TOOLS/d4j-repo/";
 //		public static String PROJ_BUG = "Chart";
 //		public static String PROJECT = "jfreechart";
 //		public static String ID = "2";
 //		public static boolean DELETE_COMMITS = false;
-        Option opt1 = new Option("d4j","D4J_REPO",true,"e.g., /home/dale/ALL_APR_TOOLS/d4j-repo/");
+        Option opt1 = new Option("d4j","D4J_REPO",true,"e.g., ../d4j-repo/");
         opt1.setRequired(false);
         Option opt2 = new Option("bugProj","PROJ_BUG",true,"e.g., Chart");
         opt2.setRequired(false);   

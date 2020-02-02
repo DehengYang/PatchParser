@@ -70,7 +70,7 @@ public class ParsePatchActor extends UntypedActor {
 				filesOfWorkers.addAll(files.subList(fromIndex, toIndex));
 				final WorkMessage workMsg = new WorkMessage(i + 1, filesOfWorkers);
 				mineRouter.tell(workMsg, getSelf());
-				// dale add print
+				// apr add print
 				System.out.println("Assign a task to worker #" + (i + 1) + "...");
 //				logger.info("Assign a task to worker #" + (i + 1) + "...");
 			}
@@ -93,13 +93,13 @@ public class ParsePatchActor extends UntypedActor {
 
 	private void calculateCommitIds() {
 		List<String> keywordPatchCommitIds = readCommitIds(this.rootPath + "Keywords/" + projectName + "/DiffEntries/");
-		// dale comment
+		// apr comment
 		//List<String> linkedPatchCommitIds = readCommitIds(this.rootPath + "Linked/" + projectName + "/DiffEntries/");
 //		List<String> unlinkedPatchCommitIds = readCommitIds(this.rootPath + "Unlinked/" + projectName + "/DiffEntries/");
 //		System.out.println("Keyword Commits: " + keywordPatchCommitIds.size());
 //		System.out.println("Linked Commits: " + linkedPatchCommitIds.size());
 //		System.out.println("Unlinked Commits: " + unlinkedPatchCommitIds.size());
-		// dale comment
+		// apr comment
 		System.out.println(projectName + " Identified patch-related commits: " + (keywordPatchCommitIds.size()));// + linkedPatchCommitIds.size()
 	}
 

@@ -71,7 +71,7 @@ public class MultipleThreadsPatchCommitsFilter {
 		List<String> commitIds = new ArrayList<>();
 		
 		msgFiles.addAll(getMessageFiles(keywordPatchsFile, "Keywords", commitIds));
-		// dale comment
+		// apr comment
 //		msgFiles.addAll(getMessageFiles(linkedPatchsFile, "Linked", commitIds));
 
 //		System.out.println("Identified patch-related commits: " + commitIds.size());

@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 public class MainTest extends TestCase{
 	public void testProjId(String bugProj, String oriProj, String id, String singleBug) throws IOException{
 		String[] args2 = new String[] {
-    			"-d4j", "/home/dale/ALL_APR_TOOLS/d4j-repo/",
+    			"-d4j", "../d4j-repo/",
     			"-bugProj", bugProj,
     			"-oriProj", oriProj,
     			"-id", id,

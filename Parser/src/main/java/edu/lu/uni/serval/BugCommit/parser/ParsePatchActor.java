@@ -117,7 +117,7 @@ public class ParsePatchActor extends UntypedActor {
 				
 				getMatch();
 				
-				// dale comment
+				// apr comment
 				// here is a NPE. I comment it for future solution.
 				// TODO
 				//exportData();
@@ -237,7 +237,7 @@ public class ParsePatchActor extends UntypedActor {
 	
 	private void mergeData(WorkerReturnMessage workerMsg) {
 		mergeData1(this.opCntMap, workerMsg.opCntMap);
-		mergeData(this.CCIList, workerMsg.CCIList); //dale 
+		mergeData(this.CCIList, workerMsg.CCIList); //apr 
 		
 		mergeData(this.stmtMaps, workerMsg.getStmtMaps());
 		mergeData(this.elementsMaps, workerMsg.getElementsMaps());

@@ -11,7 +11,7 @@ public class RunnableParser implements Runnable {
 	private int bugHunkSize;
 	private int fixHunkSize;
 	
-	// dale: not null -> proj_id commit
+	// apr: not null -> proj_id commit
 	private String idFlag;
 	
 	public RunnableParser(File prevFile, File revFile, File diffentryFile, PatchParser parser, int bugHunkSize, int fixHunkSize, String idFlag) {

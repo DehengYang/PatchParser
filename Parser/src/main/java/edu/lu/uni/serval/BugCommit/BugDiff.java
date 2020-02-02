@@ -95,7 +95,7 @@ public class BugDiff {
 				continue;
 			}
 			// seems a method to get diff, but not used
-//			String diffPath = "/home/dale/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
+//			String diffPath = "/home/apr/env/defects4j/framework/projects/Chart/patches/" + id + ".src.patch";
 //			String diffInfo = FileHelper.readFile(diffPath);
 			
 			String shellDiff = getShellDiff(proj, id);
@@ -162,7 +162,7 @@ public class BugDiff {
 		}
 		
 		String targetPath = Configuration.BUGS + proj + "/" + id + "/" + fileName;
-		///home/dale/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/data/PatchCommits/Keywords/jfreechart/Chart/1/
+		///home/apr/ALL_APR_TOOLS/Pre-PatchParse/PatchParser-D4J/data/PatchCommits/Keywords/jfreechart/Chart/1/
 		FileHelper.outputToFile(targetPath, "", false);
 		String result = shellRun2("cp " + buggyPath + " " + targetPath);
 		

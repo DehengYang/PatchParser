@@ -136,7 +136,7 @@ public class ParsePatchWorker extends UntypedActor {
 //								System.out.format("Repeated PatchCommit: %s\n", patchCommitId);
 							}
 							
-							// dale
+							// apr
 							analyzePatches2(patches, patchCommitId, opCntMap, revFile.getName());
 							
 							// add executed patchCommitId
@@ -172,15 +172,15 @@ public class ParsePatchWorker extends UntypedActor {
 			}
 			
 			//check
-//			System.out.println("Dale print: commitExecutedNoMap size:" + Configuration.commitExecutedNoMap.size());
+//			System.out.println("Apr print: commitExecutedNoMap size:" + Configuration.commitExecutedNoMap.size());
 //			for(Map.Entry<String, Integer> entry : Configuration.commitExecutedNoMap.entrySet()){
 //				String id = entry.getKey();
 //				if(Configuration.commitExecutedNoMap.get(id) != Configuration.commitNoMap.get(id)){
-//					System.out.format("Dale print: commitExecutedNoMap wrong %s v.s. %s\n", Configuration.commitExecutedNoMap.get(id), Configuration.commitNoMap.get(id));
+//					System.out.format("Apr print: commitExecutedNoMap wrong %s v.s. %s\n", Configuration.commitExecutedNoMap.get(id), Configuration.commitNoMap.get(id));
 //				}
 //			}
 			
-			System.out.println("Dale print: Selected bug-fix commits: " + patchCommitIds.size());
+			System.out.println("Apr print: Selected bug-fix commits: " + patchCommitIds.size());
 			
 			numOfPatches = calculatePatches(allPatches);
 			
@@ -525,10 +525,10 @@ public class ParsePatchWorker extends UntypedActor {
 			//System.out.println("strOpList: \n" + strOpList);
 			CCIList.add(strOpList);
 			
-			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CCI-info", 
-					"\n\nhASList: \n" + hASList.toString() + "\n\n"
-					+ "CCI:\n" + strOpList + "\n\n\n", true);
-			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CCI", strOpList + "\n\n", true);
+//			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/CCI-info", 
+//					"\n\nhASList: \n" + hASList.toString() + "\n\n"
+//					+ "CCI:\n" + strOpList + "\n\n\n", true);
+			FileHelper.outputToFile(Configuration.BUGS + proj + "/" + id +"/changeAction.txt", strOpList + "\n\n", true);
 		}
 	}
 
@@ -567,7 +567,7 @@ public class ParsePatchWorker extends UntypedActor {
 	private Map<String, Map<String, Integer>> expMaps = new HashMap<>();
 	private int expId = 0;
 	private List<String> expDepthList = new ArrayList<>();
-	// added by dale
+	// added by apr
 //	private int exp_cnt = 0;
 	StringBuilder stmtTypeChangeExamples = new StringBuilder();
 	boolean outputTypeChangeExp = false;
@@ -1170,7 +1170,7 @@ public class ParsePatchWorker extends UntypedActor {
 				deepestIndex = i;
 			}
 		}
-		// by dale
+		// by apr
 		if (!this.expDepthList.isEmpty()){
 			builder.append(this.expDepthList.get(deepestIndex)).append("\n");
 			
