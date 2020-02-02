@@ -35,12 +35,12 @@ do
 	bugNumber=${bugNumberList[i]}
 
 	# download all bugs for a given program (e.g., Chart -> Chart 1 to 26) 
-	java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main -d4j /home/dale/ALL_APR_TOOLS/d4j-repo/ -bugProj $bugProj -oriProj $oriProj
+	java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main -d4j ../d4j-repo/ -bugProj $bugProj -oriProj $oriProj
 
 	# run for each bug
 	for id in $(seq 1 $bugNumber) 
 	do
-		java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main2 -d4j /home/dale/ALL_APR_TOOLS/d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id $id 
+		java -cp "target/dependency/*" -Xmx2g edu.lu.uni.serval.Main2 -d4j ../d4j-repo/ -bugProj $bugProj -oriProj $oriProj -id $id 
 	done
 
 	# mv data
