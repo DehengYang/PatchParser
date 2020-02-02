@@ -100,10 +100,10 @@ public class PatchRelatedCommits {
 			String commitId = entry.getKey();
 			List<Pair<String,String>> diffEntryList =  entry.getValue();
 			
-			// for debug.
-			if (!commitId.equals("00ebcc58")){
-				continue;
-			}
+			// for debug. Chart 3
+//			if (!commitId.equals("00ebcc58")){
+//				continue;
+//			}
 			
 			// read all diffs of a commit
 			String diffEntryContent = "";
@@ -134,7 +134,9 @@ public class PatchRelatedCommits {
 				// if (isThisCommitFlag == diffHunks.size()){
 				
 				// This is loose commit match (i.e., >= 0.5)
-				if (isThisCommitFlag >= 0.5*diffHunks.size()){ // > 0){
+				// if (isThisCommitFlag >= 0.5*diffHunks.size()){ // > 0){
+				
+				if (isThisCommitFlag == diffHunks.size()){
 //					System.out.format("This is a buggy commit: %s\n%s\n%s\n\n", fileName, diffEntry, commitId);
 					String targetPath = Configuration.BUGS + Configuration.PROJ_BUG + "/" + id + "/CommitId-" + commitId;
 					String[] cmd3 = {"/bin/sh","-c", "cd " + Configuration.SUBJECTS_PATH + Configuration.PROJECT 

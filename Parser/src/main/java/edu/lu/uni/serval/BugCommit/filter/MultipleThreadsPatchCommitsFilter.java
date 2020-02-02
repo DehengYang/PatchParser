@@ -47,6 +47,7 @@ public class MultipleThreadsPatchCommitsFilter {
 				final WorkMessage msg = new WorkMessage(0, msgFiles);
 				try {
 //					log.info("Parsing begins...");
+					System.out.println("Parsing begins...");
 					system = ActorSystem.create("Parsing-Patch-System-" + projectName);
 					parsingActor = system.actorOf(ParsePatchActor.props(numberOfWorkers, outputPath, projectName), "patch-parse-actor-" + projectName);
 					parsingActor.tell(msg, ActorRef.noSender());
