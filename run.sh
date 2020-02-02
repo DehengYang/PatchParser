@@ -17,6 +17,15 @@ bugProjList=(Chart Closure Lang Math Mockito Time)
 oriProjList=(jfreechart closure-compiler commons-lang commons-math mockito joda-time)
 bugNumberList=(26 133 65 106 38 27) 
 
+# download repo
+cd subjects/
+git clone https://github.com/jfree/jfreechart.git
+git clone https://github.com/google/closure-compiler.git
+git clone https://github.com/apache/commons-lang.git
+git clone https://github.com/apache/commons-math.git
+git clone https://github.com/mockito/mockito.git
+git clone https://github.com/JodaOrg/joda-time.git
+
 # execute in Parser/ folder
 #for bugProj in ${bugProjList[@]}
 for((i=0;i<${#bugProjList[@]};i++))
